@@ -20,6 +20,9 @@ public class Customer {
     public String toString() {
         return name + "\t" + sex + "\t" + age + "\t" + tele + "\t\t" + mail;
     }
+    public String toStringForCsv(){
+        return name + "," + sex + "," + age + "," + tele + "," + mail;
+    }
 
     public String getName() {
         return name;

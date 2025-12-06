@@ -69,3 +69,7 @@
 1. CustomerView为主模块，负责菜单的显示和处理用户操作
 2. CustomerList为Customer对象的管理模块，内部用数组管理一组Customer对象，并提供相应的添加、修改、删除和遍历方法，供CustomerView调用
 3. Customer为实体对象，用来封装客户信息
+
+
+添加功能：
+	使用csv文件来在磁盘保存客户信息，在每次重新运行程序的时候从文件中读取用户信息

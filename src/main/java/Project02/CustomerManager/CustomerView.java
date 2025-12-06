@@ -1,5 +1,11 @@
 package Project02.CustomerManager;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -17,7 +23,29 @@ public class CustomerView {
     private static CustomerList customerList = new CustomerList();
 
     public static void main(String[] args) {
+        // File file = new File("src/main/resources/Project02/Customer.csv");
+        // BufferedWriter bw = null;
+        // try {
+        // if (!file.exists()) {
+        // bw = new BufferedWriter(new FileWriter(file));
+        // bw.write("姓名,性别,年龄,电话,邮箱\n");
+        // }
+        // } catch (IOException ioException) {
+        // System.err.println("初始化文件出错");
+        // } finally {
+        // try {
+        // if (bw != null) {
+        // bw.close();
+        // }
+        // } catch (IOException ioException1) {
+        // System.err.println("初始化文件的bw资源关闭失败");
+        // }
+        // ReadCustomer();
+        // }
+        ReadCustomer();
         mainUI();
+        System.out.println(customerList.customerLinkedList.toString());
+        customerList.customerLinkedList.keepCustomerCsv();
     }
 
     public static void mainUI() {
@@ -58,7 +86,6 @@ public class CustomerView {
                     break;
             }
         }
-
     }
 
     /**
@@ -66,8 +93,11 @@ public class CustomerView {
      */
     public static void addUI() {
         System.out.println("---------------------添加客户---------------------");
-        System.out.print("姓名：");
+        System.out.print("姓名(输入-1退出):");
         String name = input.readString();
+        if(name.equals("-1")){
+            return;
+        }
         System.out.print("性别：");
         String sex = input.readString();
         int age = -1;
@@ -83,7 +113,7 @@ public class CustomerView {
         String tele = input.readString();
         System.out.print("邮箱：");
         String mail = input.readString();
-        if (sex.length() != 1 && sex != "男" || sex != "女") {
+        if (sex.length() != 1 && (sex != "男" || sex != "女")) {
             System.out.println("性别错误，请重试");
             addUI();
         } else if (age <= 0 || age > 120) {
@@ -98,7 +128,6 @@ public class CustomerView {
     }
 
     /**
-     * 1
      * 
      * 功能二：修改用户信息
      * 
@@ -114,18 +143,23 @@ public class CustomerView {
         Customer cust = customerList.getCust(index - 1);
         boolean isSuccess = false;
         do {
+            input.readStr();
             System.out.printf("姓名(%s):", cust.getName());
             String nameNew = input.readStr();
 
             System.out.printf("性别(%s):", cust.getSex());
+            // input.readStr();
             // 正确返回true
             String sexNew = input.readStr();
+            boolean sexIsNull = false;
             if (!sexNew.isEmpty()) {
                 if (sexNew.length() != 1 && sexNew != "男" || sexNew != "女") {
                     isSuccess = true;
                     System.out.println("性别错误，请重试");
                     break;
                 }
+            }else{
+                sexIsNull = true;
             }
 
             System.out.printf("年龄(%d):", cust.getAge());
@@ -140,27 +174,30 @@ public class CustomerView {
                 cust.setAge(ageNew);
             }
 
-            // else{
-
-            // }
-
             System.out.printf("电话(%s):", cust.getTele());
             String teleNew = input.readStr();
 
             System.out.printf("邮箱(%s):", cust.getMail());
             String mailNew = input.readStr();
-            cust.setMail(mailNew);
-            cust.setSex(sexNew);
+            if(!mailNew.isEmpty()){
+                cust.setMail(mailNew);
+            }
+            
+            if(!sexIsNull){
+                cust.setSex(sexNew);
+            }
+            
 
             if (!mailNew.isEmpty()) {
+                cust.setMail(mailNew);
+            }
+            if(!teleNew.isEmpty()){
                 cust.setTele(teleNew);
             }
             if (!nameNew.isEmpty()) {
                 cust.setName(nameNew);
             }
-
         } while (isSuccess);
-
     }
 
     /**
@@ -169,7 +206,11 @@ public class CustomerView {
     public static void removeCustomerUI() {
         System.out.println("---------------------删除客户---------------------");
         System.out.print("请选择待删除客户编号(-1退出):");
+        
         int index = input.readInt();
+        if(index==-1){
+            return;
+        }
         System.out.print("确认是否删除(y/n)");
         String confirm = input.readString();
         try {
@@ -189,6 +230,75 @@ public class CustomerView {
 
         // 遍历输出用户信息
         customerList.printCustomerInfo();
+    }
+
+    /**
+     * 读写CSV文件保存客户信息
+     * 保存
+     */
+    public static boolean keepCustomer(Customer customer, boolean isOverride) {
+        BufferedWriter bw = null;
+        BufferedWriter bw1 = null; // 用来重写整个csv文件
+        try {
+            File file = new File("src/main/resources/Project02/Customer.csv");
+            if (!isOverride) {
+                bw1 = new BufferedWriter(new FileWriter(file, false));
+                bw1.write("姓名,性别,年龄,电话,邮箱\n");
+                bw1.write(customer.toStringForCsv() + "\n");
+            } else {
+                bw = new BufferedWriter(new FileWriter(file, true));
+                bw.write(customer.toStringForCsv() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bw != null) {
+                    bw.close();
+                }
+            } catch (IOException e) {
+                System.err.print("bw资源关闭出错");
+            }
+
+            try {
+                if (bw1 != null) {
+                    bw1.close();
+                }
+            } catch (IOException e) {
+                System.err.print("bw资源关闭出错");
+            } 
+        }
+        return true;
+    }
+
+    /**
+     * 读取用户信息并保存到当前运行中的链表中
+     */
+    public static void ReadCustomer() {
+        BufferedReader br = null;
+        try {
+            File file = new File("src/main/resources/Project02/Customer.csv");
+            br = new BufferedReader(new FileReader(file));
+            String customerInfo = null;
+            br.readLine();
+            while ((customerInfo = br.readLine()) != null) {
+                String[] custStr = customerInfo.split(",");
+                Customer cust = new Customer(custStr[0], custStr[1], Integer.parseInt(custStr[2]), custStr[3],
+                        custStr[4]);
+                customerList.customerLinkedList.addlast(cust);
+            }
+
+        } catch (IOException e) {
+            System.out.println("出错了，请重试");
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                System.err.println("br资源关系出错");
+            }
+        }
     }
 
 }

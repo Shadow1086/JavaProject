@@ -169,6 +169,7 @@ public class Linklist<T> {
                     + "编号\t姓名\t性别\t年龄\t电话\t\t邮箱");
             for (int i = 0; i < size; i++) {
                 System.out.println((i + 1) + "\t" + current.data.toString());
+                current = current.next;
             }
             System.out.println("-------------------------客户列表完成-------------------------\n");
         } else {
@@ -193,9 +194,20 @@ public class Linklist<T> {
         return current.data;
     }
 
-    /**
-     * 一个个返回
+     /**
+     * 程序退出时调用此方法即可将存储在内存中的所有用户信息保存到CSV文件中
      */
+     public void keepCustomerCsv(){
+        boolean isOverride = false;
+        Node current = head;
+        for(int i = 0;i<size;i++){
+            if(current.data instanceof Customer cust){
+                isOverride = CustomerView.keepCustomer(cust,isOverride);
+            }
+            current = current.next;
+        }
+     }
+ 
     /**
      * 正向遍历链表
      * 返回字符串格式：head <-> head.next <-> ... <-> tail

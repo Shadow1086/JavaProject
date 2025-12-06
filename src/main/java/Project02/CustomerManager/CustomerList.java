@@ -29,6 +29,7 @@ public class CustomerList {
         customerLinkedList.removeNode(index);
     }
 
+   
     public Customer getCust(int index){
         return customerLinkedList.getNode(index);
     }
