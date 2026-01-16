@@ -1,4 +1,4 @@
-package Project01.AccountSystem;
+package Project01.ledgerSystem;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import org.w3c.dom.UserDataHandler;
+import Project01.ledgerSystem.models.Users;
+
 
 /**
  * ClassName: Main
@@ -161,7 +162,7 @@ public class Main {
                             if (temp[1].equals(password)) {
                                 isSuccess = true;
                                 Users user = new Users(name, password);
-                                user.setId(Long.parseLong(temp[2]));
+                                user.setId(Integer.parseInt(temp[2]));
                                 passwordFlag = false;
                                 // //更新余额
                                 // user.setBalance(getLastestBalance(String.valueOf(user.getId())));

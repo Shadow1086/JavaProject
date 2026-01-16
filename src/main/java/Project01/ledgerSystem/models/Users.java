@@ -1,4 +1,4 @@
-package Project01.AccountSystem;
+package Project01.ledgerSystem.models;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,11 +21,9 @@ public class Users {
     private String name;
     private String password;
     private double balance;
-    private long id;
+    private int id;
 
     public Users() {
-        this.id = System.currentTimeMillis();
-
     }
 
     public Users(String name, String password) {
@@ -58,11 +56,11 @@ public class Users {
         this.password = password;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -145,7 +143,7 @@ public class Users {
         }
     }
 
-    public double getLastestBalance(long id) {
+    public double getLastestBalance(int id) {
         BufferedReader br = null;
         double lastestBalance = 0;
         try {
