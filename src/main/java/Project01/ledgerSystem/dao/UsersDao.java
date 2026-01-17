@@ -4,7 +4,7 @@ import Project01.ledgerSystem.models.Users;
 
 public interface UsersDao {
     // 注册
-    boolean signUp(Users user);
+    int signUp(Users user);
     // 登陆
     boolean logIn(String name,String password);
     //取/存 款

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import Project01.ledgerSystem.models.Users;
 import Project01.ledgerSystem.util.DBUtil;
@@ -15,22 +16,27 @@ public class UsersDaoImpl implements UsersDao {
      * @param User user : 从界面获取用户对象
      */
     @Override
-    public boolean signUp(Users user) {
+    public int signUp(Users user) {
+        int id = -1;
         String sql = """
                 INSERT INTO users_info
-                SET (user_name,user_password)
-                VALUES (?,?)
+                (user_name,user_password)
+                VALUES (?,?);
                 """;
         try (Connection conn = DBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getName());
             ps.setString(2, user.getPassword());
             ps.execute();
+            ResultSet rs =  ps.getGeneratedKeys();
+            if(rs.next()){
+                id = rs.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return id;
         }
-        return true;
+        return id;
     }
 
     /**
@@ -42,7 +48,7 @@ public class UsersDaoImpl implements UsersDao {
     @Override
     public boolean logIn(String name, String password) {
         String sql = """
-                SELECT * FROM user_id
+                SELECT * FROM users_info
                 WHERE user_name = ? AND user_password = ?
                 """;
         try (Connection conn = DBUtil.getConnection();
@@ -63,22 +69,20 @@ public class UsersDaoImpl implements UsersDao {
     @Override
     public boolean withdrawMoney(Users users, double money, int funcNum) {
         String sql = """
-                INSERT INTO account_details (user_detail,user_detail_balance)
-                VALUES (?,?)
-                WHERE user_id = ?
+                INSERT INTO account_details (user_id,user_detail,user_detail_balance)
+                VALUES (?,?,?)
                 """;
         try (Connection conn = DBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             double newBalance = -1;
+            ps.setInt(1, users.getId());
             if (funcNum > 0) {
-                ps.setString(1, "收入");
-                ps.setDouble(2, money);
-                ps.setInt(3, users.getId());
+                ps.setString(2, "收入");
+                ps.setDouble(3, money);
                 newBalance = getBalance(users.getId()) + money;
             } else if (funcNum < 0) {
-                ps.setString(1, "支出");
-                ps.setDouble(2, money);
-                ps.setInt(3, users.getId());
+                ps.setString(2, "支出");
+                ps.setDouble(3, money);
                 newBalance = getBalance(users.getId()) - money;
             } else {
                 return false;
@@ -130,9 +134,8 @@ public class UsersDaoImpl implements UsersDao {
     @Override
     public boolean resetBalance(int user_id, double money) {
         String sql = """
-                UPDATE user_info
-                SET (user_balance)
-                VALUES (?)
+                UPDATE users_info
+                SET user_balance = ?
                 WHERE user_id = ?
                 """;
         try (Connection conn = DBUtil.getConnection();
@@ -155,7 +158,7 @@ public class UsersDaoImpl implements UsersDao {
         double balance = -1;
         String sql = """
                 SELECT user_balance
-                FROM user_info
+                FROM users_info
                 WHERE user_id = ?
                 """;
         try (Connection conn = DBUtil.getConnection();

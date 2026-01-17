@@ -103,3 +103,5 @@ package/
 # 其他
 *.orig
 *.rej
+
+.env

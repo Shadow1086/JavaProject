@@ -10,8 +10,8 @@ public class DBUtil {
     public static final HikariDataSource dataSource;
 
     static{
-        Dotenv dotenv = Dotenv.load();
-        HikariConfig config = new HikariConfig("src/main/resources/Project01/hikaricp.properties");
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        HikariConfig config = new HikariConfig("/Project01/hikaricp.properties");
         config.setJdbcUrl(dotenv.get("DB_URL"));
         config.setUsername(dotenv.get("DB_USER"));
         config.setPassword(dotenv.get("DB_PASS"));
