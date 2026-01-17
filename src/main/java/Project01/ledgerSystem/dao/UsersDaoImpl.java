@@ -55,12 +55,17 @@ public class UsersDaoImpl implements UsersDao {
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setString(2, password);
-            ps.execute();
+            try(ResultSet rs= ps.executeQuery()) {
+                if(rs.next()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
     /**

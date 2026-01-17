@@ -89,28 +89,31 @@ public class Main {
     }
 
     public static Users logInUI() {
-        Scanner input = new Scanner(System.in);
-        // 初始化界面：
-        boolean isSuccess = false;
-        while (!isSuccess) {
-            System.out.print("-----------------登录-------------\n" +
-                    "提示：若无账户请在输入用户名时输入0进入注册页面\n" +
-                    "请输入用户名：");
-            String name = input.next();
-            if (name.equals("0")) {
-                SignInUI();
-                break;
-            } else {
-                System.out.print("请输入密码：");
-                String password = input.next();
-                if(userSer.logIn(name, password)){
-                    System.out.println("登陆成功");
-                }else{
-                    System.out.println("登陆失败，请检查用户名密码是否错误");
+        try (Scanner input = new Scanner(System.in)) {
+            // 初始化界面：
+            boolean isSuccess = false;
+            while (!isSuccess) {
+                System.out.print("-----------------登录-------------\n" +
+                        "提示：若无账户请在输入用户名时输入0进入注册页面\n" +
+                        "请输入用户名：");
+                String name = input.next();
+                if (name.equals("0")) {
+                    SignInUI();
+                    break;
+                } else {
+                    System.out.print("请输入密码：");
+                    String password = input.next();
+                    if (userSer.logIn(name, password)) {
+                        System.out.println("登陆成功");
+                        isSuccess = true;
+                        return new Users(name, password);
+                    } else {
+                        System.out.println("登陆失败，请检查用户名密码是否错误");
+                    }
                 }
             }
+            return null;
         }
-        return null;
     }
 
     public static void SignInUI() {

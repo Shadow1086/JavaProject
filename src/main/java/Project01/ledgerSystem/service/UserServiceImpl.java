@@ -22,8 +22,7 @@ public class UserServiceImpl {
     // 登陆
     public boolean logIn(String name, String password) {
         if (!name.isEmpty() && name != "" && !password.isEmpty() && password != null) {
-            dao.logIn(name, password);
-            return true;
+            return dao.logIn(name, password);
         }
         return false;
     }
