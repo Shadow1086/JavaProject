@@ -1,17 +1,18 @@
+-- Active: 1765086984256@@167.99.162.149@13306@ledger_system
 USE ledger_system;
 
 DROP TABLE IF EXISTS users_info;
-DROP TABLE IF EXISTS account_info;
+DROP TABLE IF EXISTS account_details;
 
 create table if not EXISTS users_info(
     user_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
     user_name VARCHAR(20) NOT NULL COMMENT '用户名',
     user_password VARCHAR(20) NOT NULL UNIQUE COMMENT '账户密码',
     user_balance DOUBLE DEFAULT 0 COMMENT '用户余额'
-)
+);
 
 CREATE TABLE IF NOT EXISTS account_details(
-    account_id INT PRIMARY KEY COMMENT '账户信息的ID',
+    account_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '账户信息的ID',
     user_id INT COMMENT '用于查询的所属账号ID',
     user_detail CHAR(6) NOT NULL COMMENT '账号的收支类型',
     user_detail_balance DOUBLE NOT NULL COMMENT '收支金额',

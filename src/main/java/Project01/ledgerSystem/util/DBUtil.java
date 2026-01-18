@@ -16,6 +16,11 @@ public class DBUtil {
         config.setUsername(dotenv.get("DB_USER"));
         config.setPassword(dotenv.get("DB_PASS"));
         dataSource = new HikariDataSource(config);
+        try{
+            dataSource.getConnection().close();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
     }
     public static Connection getConnection() throws SQLException{
         return dataSource.getConnection();
