@@ -85,20 +85,21 @@ public class UsersDaoImpl implements UsersDao {
         double result = -1;
         try (Connection conn = DBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            double newBalance = -1;
             ps.setInt(1, users.getId());
             if (funcNum > 0) {
                 ps.setString(2, "收入");
                 ps.setDouble(3, money);
-                newBalance = getBalance(users.getId()) + money;
+                result = getBalance(users.getId()) + money;
+                ps.executeUpdate();
             } else if (funcNum < 0) {
                 ps.setString(2, "支出");
                 ps.setDouble(3, money);
-                newBalance = getBalance(users.getId()) - money;
+                result = getBalance(users.getId()) - money;
+                ps.executeUpdate();
             } else {
                 return result;
             }
-            resetBalance(users.getId(), newBalance);
+            resetBalance(users.getId(), result);
         } catch (SQLException e) {
             e.printStackTrace();
             return result;
@@ -125,9 +126,9 @@ public class UsersDaoImpl implements UsersDao {
                 int i = 0;
                 while (rs.next()&& i<=15) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(rs.getString("user_name"));
-                    sb.append(rs.getString("user_detail"));
-                    sb.append(rs.getString("user_detail_balance"));
+                    sb.append(rs.getString("user_name")+"\t");
+                    sb.append(rs.getString("user_detail")+"\t\t");
+                    sb.append(rs.getString("user_detail_balance")+"\t\t");
                     sb.append(rs.getString("update_time"));
                     result[i] = sb;
                 }
@@ -153,6 +154,7 @@ public class UsersDaoImpl implements UsersDao {
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, money);
             ps.setInt(2, user_id);
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             // throw new SQLException(e);

@@ -21,6 +21,7 @@ public class Main {
     private static final Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
+        
         boolean isExit = false;
         while (!isExit) {
             Users user = logInUI();
@@ -46,6 +47,7 @@ public class Main {
                 switch (fucNum) {
                     case 1:
                         System.out.println("-----------------------收支明细-------------------");
+                        userSer.getInfo(user);
                         break;
                     case 2:
                         System.out.println("-----------------------存款-------------------");
@@ -96,8 +98,7 @@ public class Main {
                     "请输入用户名：");
             String name = input.next();
             if (name.equals("0")) {
-                SignInUI();
-                break;
+                return SignInUI();
             } else {
                 System.out.print("请输入密码：");
                 String password = input.next();
@@ -108,13 +109,14 @@ public class Main {
                     return user;
                 } else {
                     System.out.println("登陆失败，请检查用户名密码是否错误");
+                    return null;
                 }
             }
         }
         return null;
     }
 
-    public static void SignInUI() {
+    public static Users SignInUI() {
         System.out.print("确定进入注册吗？(y/n)：");
         if (input.next().equalsIgnoreCase("y")) {
             System.out.print("请输入用户名：");
@@ -123,11 +125,13 @@ public class Main {
             String password = input.next();
             if (userSer.signUp(name, password)) {
                 System.out.println("注册成功，返回至登录界面重新登录");
+                return logInUI();
             } else {
                 System.out.println("注册失败，请检查输入格式是否正确");
             }
         } else {
             logInUI();
         }
+        return null;
     }
 }
