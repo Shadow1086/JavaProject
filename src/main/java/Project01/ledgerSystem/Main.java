@@ -18,6 +18,7 @@ import Project01.ledgerSystem.service.UserServiceImpl;
  */
 public class Main {
     private static final UserServiceImpl userSer = new UserServiceImpl();
+    private static final Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
         boolean isExit = false;
@@ -32,7 +33,6 @@ public class Main {
     }
 
     public static boolean mainUI(Users user) {
-        Scanner input = new Scanner(System.in);
         try {
             while (true) {
                 System.out.print("-----------------谷粒记账软件-----------------\n" +
@@ -52,7 +52,7 @@ public class Main {
                         System.out.print("请输入存入的金额：");
                         double money = input.nextDouble();
                         if (money > 0) {
-                            user.saveMoney(money);
+                            userSer.saveMoney(user, money);
                         }
                         break;
                     case 3:
@@ -60,7 +60,7 @@ public class Main {
                         System.out.print("请输入取出的金额：");
                         double withdrawMoney = input.nextDouble();
                         if (withdrawMoney <= user.getBalance() && withdrawMoney > 0) {
-                            user.withdrawMoney(withdrawMoney);
+                            userSer.withdrawMoney(user, withdrawMoney);
                         } else {
                             System.out.println("取出金额不正确，可能是余额不足，请检查");
                         }
@@ -84,40 +84,37 @@ public class Main {
             System.out.println("输入错误，请重试");
             mainUI(user);
         }
-        input.close();
         return true;
     }
 
     public static Users logInUI() {
-        try (Scanner input = new Scanner(System.in)) {
-            // 初始化界面：
-            boolean isSuccess = false;
-            while (!isSuccess) {
-                System.out.print("-----------------登录-------------\n" +
-                        "提示：若无账户请在输入用户名时输入0进入注册页面\n" +
-                        "请输入用户名：");
-                String name = input.next();
-                if (name.equals("0")) {
-                    SignInUI();
-                    break;
+        // 初始化界面：
+        boolean isSuccess = false;
+        while (!isSuccess) {
+            System.out.print("-----------------登录-------------\n" +
+                    "提示：若无账户请在输入用户名时输入0进入注册页面\n" +
+                    "请输入用户名：");
+            String name = input.next();
+            if (name.equals("0")) {
+                SignInUI();
+                break;
+            } else {
+                System.out.print("请输入密码：");
+                String password = input.next();
+                Users user = userSer.logIn(name, password);
+                if (user != null) {
+                    System.out.println("登陆成功");
+                    isSuccess = true;
+                    return user;
                 } else {
-                    System.out.print("请输入密码：");
-                    String password = input.next();
-                    if (userSer.logIn(name, password)) {
-                        System.out.println("登陆成功");
-                        isSuccess = true;
-                        return new Users(name, password);
-                    } else {
-                        System.out.println("登陆失败，请检查用户名密码是否错误");
-                    }
+                    System.out.println("登陆失败，请检查用户名密码是否错误");
                 }
             }
-            return null;
         }
+        return null;
     }
 
     public static void SignInUI() {
-        Scanner input = new Scanner(System.in);
         System.out.print("确定进入注册吗？(y/n)：");
         if (input.next().equalsIgnoreCase("y")) {
             System.out.print("请输入用户名：");
@@ -129,10 +126,8 @@ public class Main {
             } else {
                 System.out.println("注册失败，请检查输入格式是否正确");
             }
-
         } else {
             logInUI();
         }
-        input.close();
     }
 }

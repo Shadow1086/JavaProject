@@ -1,6 +1,5 @@
 package Project01.ledgerSystem.service;
 
-import java.sql.SQLException;
 
 import Project01.ledgerSystem.dao.UsersDaoImpl;
 import Project01.ledgerSystem.models.Users;
@@ -20,28 +19,28 @@ public class UserServiceImpl {
     }
 
     // 登陆
-    public boolean logIn(String name, String password) {
+    public Users logIn(String name, String password) {
         if (!name.isEmpty() && name != "" && !password.isEmpty() && password != null) {
             return dao.logIn(name, password);
         }
-        return false;
+        return null;
     }
 
     // 取款
-    public boolean withdrawMoney(Users user, double money) {
+    public double withdrawMoney(Users user, double money) {
+        double result = -1;
         if (money > 0 || dao.getBalance(0) >= money) {
-            dao.withdrawMoney(user, money, -1);
-            return true;
+            result = dao.withdrawMoney(user, money, -1);
         }
-        return false;
+        return result;
     }
     // 存款
-    public boolean saveMoney(Users user, double money) {
+    public double saveMoney(Users user, double money) {
+        double result =-1;
         if (money > 0) {
-            dao.withdrawMoney(user, money, 1);
-            return true;
+            result = dao.withdrawMoney(user, money, 1);
         }
-        return false;
+        return result;
     }
     //查询所有交易明细
     public boolean getInfo(Users user){

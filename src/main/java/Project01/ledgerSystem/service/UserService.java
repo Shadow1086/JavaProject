@@ -6,11 +6,11 @@ public interface UserService {
     //注册
     public boolean signUp(String name,String password);
     //登陆
-    public boolean logIn(String name,String password);
+    public Users logIn(String name,String password);
     //  取款
-    public boolean withdrawMoney(Users user , double money);
+    public double withdrawMoney(Users user , double money);
     // 存款
-    public boolean saveMoney(Users user,double money);
+    public double saveMoney(Users user,double money);
     //查看明细
     public boolean getInfo(Users user);
 }

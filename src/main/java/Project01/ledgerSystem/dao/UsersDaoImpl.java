@@ -42,11 +42,11 @@ public class UsersDaoImpl implements UsersDao {
     /**
      * 用户的登录
      * 
-     * @param name     : 用户名
+     * @param name  用户名
      * @param password 密码
      */
     @Override
-    public boolean logIn(String name, String password) {
+    public Users logIn(String name, String password) {
         String sql = """
                 SELECT * FROM users_info
                 WHERE user_name = ? AND user_password = ?
@@ -57,14 +57,19 @@ public class UsersDaoImpl implements UsersDao {
             ps.setString(2, password);
             try(ResultSet rs= ps.executeQuery()) {
                 if(rs.next()){
-                    return true;
+                    int idNew = rs.getInt("user_id");
+                    double balanceNew = rs.getDouble("user_balance");
+                    String nameNew = rs.getString("user_name");
+                    String passwordNew = rs.getString("user_password");
+                    Users user = new Users(idNew,nameNew,passwordNew,balanceNew);
+                    return user;
                 }else{
-                    return false;
+                    return null;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 
@@ -72,11 +77,12 @@ public class UsersDaoImpl implements UsersDao {
      * 取/存 款
      */
     @Override
-    public boolean withdrawMoney(Users users, double money, int funcNum) {
+    public double withdrawMoney(Users users, double money, int funcNum) {
         String sql = """
                 INSERT INTO account_details (user_id,user_detail,user_detail_balance)
                 VALUES (?,?,?)
                 """;
+        double result = -1;
         try (Connection conn = DBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             double newBalance = -1;
@@ -90,14 +96,14 @@ public class UsersDaoImpl implements UsersDao {
                 ps.setDouble(3, money);
                 newBalance = getBalance(users.getId()) - money;
             } else {
-                return false;
+                return result;
             }
             resetBalance(users.getId(), newBalance);
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return result;
         }
-        return true;
+        return result;
     }
 
     /**
