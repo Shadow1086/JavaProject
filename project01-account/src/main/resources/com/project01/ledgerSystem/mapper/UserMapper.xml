@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 写一个根标签：namespace 指定当前mapper的命名空间 -->
+<mapper namespace="com.project01.ledgerSystem.mapper.UserMapper">
+    <resultMap id="UserResultMap" type="User">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_password" property="userPassword"/>
+        <result column="user_balance" property="userBalance"/>
+    </resultMap>
+    <resultMap id="InfoResultMap" type="com.project01.ledgerSystem.dto.Detail">
+        <result column="user_name" property="userName"/>
+        <result column="transaction_type" property="transactionType"/>
+        <result column="transaction_time" property="transactionTime"/>
+    </resultMap>
+
+    <!--用户注册-->
+    <insert id="signIn" useGeneratedKeys="true" keyProperty="userId" >
+        INSERT INTO user_info
+            (user_name, user_password)
+        VALUES (#{userName}, #{userPassword});
+    </insert>
+
+    <!--    登录，查询是否有用户名密码匹配的用户-->
+    <select id="logIn" resultType="User">
+        SELECT * FROM user_info
+        <where>
+            <if test="userName!=null and userName!=''">
+                AND user_name = #{userName}
+            </if>
+            <if test="userPassword!=null and userPassword!=''">
+                AND user_password = #{userPassword}
+            </if>
+        </where>
+    </select>
+
+    <!--更新用户收支明细-->
+    <insert id="saveMoney">
+        insert into transaction_records (user_id,transaction_type,amount)
+        VALUES (#{userId},'存入',#{money})
+    </insert>
+
+    <insert id="withdrawMoney">
+        insert into transaction_records (user_id,transaction_type,amount)
+        VALUES (#{userId},'取出',#{money})
+    </insert>
+
+    <!--获取用户的余额明细-->
+    <select id="getInfo" resultType="com.project01.ledgerSystem.dto.Detail">
+        SELECT ui.user_name,tr.transaction_type,tr.amount,tr.transaction_time
+        FROM transaction_records tr
+        JOIN user_info ui ON ui.user_id = tr.user_id
+        <where>
+            <if test="userId!=null">
+                tr.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+</mapper>
