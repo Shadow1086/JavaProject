@@ -1,0 +1,53 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Java / Maven
+**/target/
+**/out/
+*.class
+
+# Node / Vite
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.vite/
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+*.local
+
+# Sensitive backend config
+**/db.properties
+**/jdbc.properties
+**/jdbc-*.properties
+**/application-local.properties
+**/application-dev.properties
+**/application-prod.properties
+**/application-secret.properties
+**/*secret*.properties
+**/*private*.properties
+
+# Runtime uploads / temp files
+**/temp/
+**/tmp/
+**/uploads/
