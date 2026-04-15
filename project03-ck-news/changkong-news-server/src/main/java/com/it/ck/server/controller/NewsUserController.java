@@ -48,4 +48,22 @@ public class NewsUserController extends BaseController{
 			WebUtil.writeJson(resp,Result.build(null,ResultCodeEnum.PASSWORD_ERROR));
 		}
 	}
+
+
+	/**
+	 * 用户注册
+	 */
+	protected void register(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		NewsUser newsUser = WebUtil.readJson(req, NewsUser.class);
+		Result result =  Result.ok(null);
+
+		if(userService.findByName(newsUser.getUsername()).isEmpty()){
+			Integer success = userService.register(newsUser);
+			if(success == 1){
+				WebUtil.writeJson(resp,result);
+			}
+		}else {
+			WebUtil.writeJson(resp,Result.build(null,ResultCodeEnum.USERNAME_USED));
+		}
+	}
 }
