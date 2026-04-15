@@ -1,6 +1,7 @@
 package com.it.ck.server.service;
 
 import com.it.ck.server.pojo.NewsType;
+import com.it.ck.server.pojo.NewsUser;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface NewsTypeService {
 	 *  查询所有新闻类型
 	 */
 	public List<NewsType> findAllTypes();
+
+
 }

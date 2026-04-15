@@ -1,5 +1,9 @@
 package com.it.ck.server.dao;
 
+import com.it.ck.server.pojo.NewsUser;
+
+import java.util.List;
+
 /**
  * Package: com.it.ck.server.dao
  * Description:
@@ -8,4 +12,11 @@ package com.it.ck.server.dao;
  * {@code @Create} 2026-2026/4/14 22:23
  */
 public interface NewsUserDao {
+	/**
+	 * 根据用户名查找用户信息
+	 * @param username  用户名
+	 * @return          用户名查找到的用户对象
+	 */
+	public List<NewsUser> findByName(String username);
+
 }

@@ -31,7 +31,7 @@ public class WebUtil {
 		try{
 			reader = request.getReader();
 			StringBuilder buffer = new StringBuilder();
-			String line = reader.readLine();
+			String line;
 			while((line=reader.readLine())!=null){
 				buffer.append(line);
 			}

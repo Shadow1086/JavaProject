@@ -20,6 +20,8 @@
 
 import instance from "../axios";
 import {onMounted, ref} from "vue";
+import router from "../routers/router";
+
 interface NewsType{
     tid:number;
     tname:string;
@@ -47,7 +49,7 @@ onMounted(()=>{
 
 
 function login() {
-    alert('此功能待更新');
+    router.push("login");
 }
 
 function register() {

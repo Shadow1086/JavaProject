@@ -41,7 +41,7 @@ public class Result<T> {
 		return result;
 	}
 
-	protected static <T> Result<T> build(T data, ResultCodeEnum resultCodeEnum){
+	public static <T> Result<T> build(T data, ResultCodeEnum resultCodeEnum){
 		Result<T> result = build(data);
 		result.setCode(resultCodeEnum.getCode());
 		result.setMessage(resultCodeEnum.getMessage());
