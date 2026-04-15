@@ -1,12 +1,10 @@
-package com.it.ck.server.pojo;
+package com.it.ck.server.pojo.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Scanner;
-import java.util.Arrays;
 
 /**
  * Package: com.it.ck.server.pojo
