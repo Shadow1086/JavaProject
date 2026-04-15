@@ -1,13 +1,8 @@
 <template>
     <div class="header-container">
-
         <div class="left-header">
             <a href="#">长空头条</a>
-            <a href="#">新闻</a>
-            <a href="#">体育</a>
-            <a href="#">娱乐</a>
-            <a href="#">科技</a>
-            <a href="#">其他</a>
+                <a href="#" v-for="item in newsTypes" :key="item.tid">{{ item.tname }}</a>
         </div>
 
         <div class="right-header">
@@ -22,10 +17,40 @@
 </template>
 
 <script setup lang="ts">
-function login(){
+
+import instance from "../axios";
+import {onMounted, ref} from "vue";
+interface NewsType{
+    tid:number;
+    tname:string;
+}
+interface Result<T>{
+    code:number;
+    message:string;
+    data:T;
+}
+const newsTypes = ref<NewsType[]>([]);
+
+
+async function showNewsTypes(){
+    try{
+        const response = await instance.get("/portal/findAllTypes");
+        newsTypes.value = response.data.data ?? [];
+    }catch (e) {
+        newsTypes.value=[];
+    }
+}
+
+onMounted(()=>{
+    showNewsTypes();
+})
+
+
+function login() {
     alert('此功能待更新');
 }
-function register(){
+
+function register() {
     alert('此功能待更新');
 }
 </script>
@@ -37,13 +62,16 @@ a {
     text-decoration: none;
     font-size: 16px;
 }
-a:first-child,a:first-child:hover{
+
+a:first-child, a:first-child:hover {
     color: #c0adab;
 }
+
 a:hover {
     color: #59636b;
 }
-.header-container{
+
+.header-container {
     width: 100vw;
     height: 7vh;
     background-color: #212529;
@@ -51,12 +79,13 @@ a:hover {
     justify-content: space-around;
 }
 
-.left-header,.right-header,.btn-list{
+.left-header, .right-header, .btn-list {
     display: flex;
     align-items: center;
     gap: 15px;
 }
-.btn-list>button:last-of-type{
+
+.btn-list > button:last-of-type {
     background-color: #ffc008;
 }
 
