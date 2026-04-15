@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.Scanner;
-import java.util.Arrays;
 
 /**
  * Package: com.it.ck.server.utils
@@ -22,32 +20,30 @@ import java.util.Arrays;
 
 public class JDBCUtil {
 	private static final ThreadLocal<Connection> threadLocal = new ThreadLocal<>();
-
 	@Getter
 	private static DataSource dataSource;
 
-	// 初始化连接池
-	static{
+	static {
 		Properties properties = new Properties();
 		InputStream resourceAsStream = JDBCUtil.class.getClassLoader().getResourceAsStream("db.properties");
-		try{
+		try {
 			properties.load(resourceAsStream);
-		}catch (IOException e){
-			throw  new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		try{
+		try {
 			dataSource = DruidDataSourceFactory.createDataSource(properties);
-		}catch (Exception e ){
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static Connection getConnection(){
+	public static Connection getConnection() {
 		Connection connection = threadLocal.get();
-		if(null == connection){
+		if (connection == null) {
 			try {
 				connection = dataSource.getConnection();
-			}catch (SQLException e){
+			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
 			threadLocal.set(connection);
@@ -55,14 +51,13 @@ public class JDBCUtil {
 		return connection;
 	}
 
-	public static  void releaseConnection(){
+	public static void releaseConnectin() {
 		Connection connection = threadLocal.get();
-		if(null!=connection){
-			threadLocal.remove();
-			try{
+		if (null != connection) {
+			try {
 				connection.setAutoCommit(true);
 				connection.close();
-			}catch (SQLException e){
+			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}

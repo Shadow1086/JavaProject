@@ -42,7 +42,7 @@ public class Result<T> {
 	}
 
 	protected static <T> Result<T> build(T data, ResultCodeEnum resultCodeEnum){
-		Result<T> result = new Result<T>();
+		Result<T> result = build(data);
 		result.setCode(resultCodeEnum.getCode());
 		result.setMessage(resultCodeEnum.getMessage());
 		return result;
