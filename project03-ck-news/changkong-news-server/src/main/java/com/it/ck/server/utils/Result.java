@@ -59,6 +59,11 @@ public class Result<T> {
 		return build(data,ResultCodeEnum.SUCCESS);
 	}
 
+	public static<T> Result<T> fail(T data,ResultCodeEnum resultCodeEnum){
+		Result<T> result = build(data);
+		return build(data,resultCodeEnum);
+	}
+
 	public Result<T> message(String msg){
 		this.setMessage(msg);
 		return this;

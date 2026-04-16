@@ -3,12 +3,12 @@
 <template>
     <div class="container">
         <div class="item-list">
-            <div class="item">
-                <span class="title">测试数据</span>
+            <div class="item" v-for="(item,index) in list" :key="index">
+                <span class="title">{{ item.title }}</span>
                 <div class="span-list">
-                    <span>测试新闻</span>
-                    <span>浏览量</span>
-                    <span>发布时间</span>
+                    <span class="type">{{ item.type }}</span>
+                    <span class="pageView">{{ item.pageView }}</span>
+                    <span class="pastHours">{{ item.pastHors }}</span>
                 </div>
                 <button @click="showDetail()">查看全文</button>
             </div>
@@ -17,6 +17,23 @@
 </template>
 
 <script setup lang="ts">
+
+import {onMounted, ref} from "vue";
+import instance from "../../axios";
+
+type news={
+    title:string;
+    type:string;
+    pageView:number;
+    pastHors:string
+}
+
+onMounted(()=>{
+    instance.post("/headline/show")
+})
+
+const list = ref<news[]>([]);
+
 function showDetail(){
     alert("待开发")
 }
@@ -29,5 +46,8 @@ function showDetail(){
         align-items: center;
         justify-content: center;
         gap: 3vh;
+    }
+    .item {
+        border: 1px solid #59636b;
     }
 </style>

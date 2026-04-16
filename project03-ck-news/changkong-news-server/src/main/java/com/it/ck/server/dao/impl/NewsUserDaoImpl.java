@@ -3,6 +3,7 @@ package com.it.ck.server.dao.impl;
 import com.it.ck.server.dao.NewsUserDao;
 import com.it.ck.server.pojo.NewsUser;
 import com.it.ck.server.utils.JDBCUtil;
+import com.it.ck.server.utils.Result;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +29,7 @@ public class NewsUserDaoImpl implements NewsUserDao {
 	 * @return 用户名查找到的用户对象
 	 */
 	@Override
-	public List<NewsUser> findByName(String username) {
+	public NewsUser findByName(String username) {
 
 		String sql = """
 				SELECT
@@ -38,30 +39,26 @@ public class NewsUserDaoImpl implements NewsUserDao {
 				""";
 		List<NewsUser> userList = null;
 		Connection connection = JDBCUtil.getConnection();
+		NewsUser user = null;
 		try (
 				PreparedStatement ps = connection.prepareStatement(sql);
 		) {
-			userList = new ArrayList<>();
 			ps.setString(1, username);
 			try (
 					ResultSet rs = ps.executeQuery()
 			) {
-				NewsUser user = null;
 				while (rs.next()) {
 					user = new NewsUser();
 					user.setUid(rs.getInt("uid"));
 					user.setUsername(rs.getString("username"));
 					user.setUserPwd(rs.getString("userPwd"));
 					user.setNickName(rs.getString("nickName"));
-					userList.add(user);
 				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		} finally {
-			JDBCUtil.releaseConnectin();
 		}
-		return userList;
+		return user;
 	}
 
 	/**
@@ -71,24 +68,29 @@ public class NewsUserDaoImpl implements NewsUserDao {
 	 * @return 被影响的行数，1: 注册成功，0: 注册失败
 	 */
 	@Override
-	public Integer register(NewsUser user) {
+	public NewsUser register(NewsUser user) {
 		String sql = """
 				INSERT INTO news_user VALUES(DEFAULT,?,?,?)
 				""";
 		Connection connection = JDBCUtil.getConnection();
 		try (
-				PreparedStatement ps = connection.prepareStatement(sql);
+				PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
 		) {
 			ps.setString(1, user.getUsername());
 			ps.setString(2, user.getUserPwd());
 			ps.setString(3, Objects.equals(user.getNickName(), "") ? user.getNickName() : null);
-
-			return ps.executeUpdate();
-
+			int row = ps.executeUpdate();
+			if(row>0){
+				try(ResultSet rs = ps.getGeneratedKeys()){
+					if(rs.next()){
+						user.setUid(rs.getInt(1));
+					}
+				}
+				return user;
+			}
+return null;
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
-		} finally {
-			JDBCUtil.releaseConnectin();
 		}
 	}
 }

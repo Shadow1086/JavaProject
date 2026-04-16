@@ -2,7 +2,7 @@
     <div class="header-container">
         <div class="left-header">
             <a href="#">长空头条</a>
-                <a href="#" v-for="item in newsTypes" :key="item.tid">{{ item.tname }}</a>
+            <a href="#" v-for="item in newsTypes" :key="item.tid">{{ item.tname }}</a>
         </div>
 
         <div class="right-header">
@@ -22,28 +22,30 @@ import instance from "../axios";
 import {onMounted, ref} from "vue";
 import router from "../routers/router";
 
-interface NewsType{
-    tid:number;
-    tname:string;
+interface NewsType {
+    tid: number;
+    tname: string;
 }
-interface Result<T>{
-    code:number;
-    message:string;
-    data:T;
+
+interface Result<T> {
+    code: number;
+    message: string;
+    data: T;
 }
+
 const newsTypes = ref<NewsType[]>([]);
 
 
-async function showNewsTypes(){
-    try{
+async function showNewsTypes() {
+    try {
         const response = await instance.get("/portal/findAllTypes");
         newsTypes.value = response.data.data ?? [];
-    }catch (e) {
-        newsTypes.value=[];
+    } catch (e) {
+        newsTypes.value = [];
     }
 }
 
-onMounted(()=>{
+onMounted(() => {
     showNewsTypes();
 })
 
@@ -53,7 +55,7 @@ function login() {
 }
 
 function register() {
-    alert('此功能待更新');
+    router.push("register");
 }
 </script>
 

@@ -17,12 +17,12 @@ public interface NewsUserService {
 	 * @param username  用户名
 	 * @return          用户名查找到的用户对象
 	 */
-	public List<NewsUser> findByName(String username);
+	public NewsUser findByName(String username);
 
 	/**
 	 * 用户注册
 	 * @param user  注册的用户信息
 	 * @return      被影响的行数，1: 注册成功，0: 注册失败
 	 */
-	public Integer register(NewsUser user);
+	public NewsUser register(NewsUser user);
 }
