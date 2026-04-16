@@ -1,7 +1,19 @@
 package com.it.ck.server.controller;
 
+import com.it.ck.server.pojo.NewsHeadline;
+import com.it.ck.server.pojo.PageInfo;
+import com.it.ck.server.pojo.vo.HeadLinePageVo;
+import com.it.ck.server.pojo.vo.HeadlineQueryVo;
+import com.it.ck.server.service.NewsHeadLineService;
+import com.it.ck.server.service.impl.NewsHeadLineServiceImpl;
+import com.it.ck.server.utils.WebUtil;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Arrays;
 
@@ -13,6 +25,13 @@ import java.util.Arrays;
  * {@code @Create} 2026-2026/4/15 10:48
  */
 @WebServlet("/headline/*")
-public class NewsHeadLineController {
+public class NewsHeadLineController extends BaseController{
+	private static NewsHeadLineService service = new NewsHeadLineServiceImpl();
 
+
+//	protected void findPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//		HeadlineQueryVo query = WebUtil.readJson(req, HeadlineQueryVo.class);
+//		PageInfo<HeadLinePageVo> page = service.findPage(query);
+//
+//	}
 }

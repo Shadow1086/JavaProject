@@ -1,6 +1,13 @@
 package com.it.ck.server.service.impl;
 
+import com.it.ck.server.dao.NewsHeadLineDao;
+import com.it.ck.server.dao.impl.NewsHeadLineDaoImpl;
+import com.it.ck.server.pojo.PageInfo;
+import com.it.ck.server.pojo.vo.HeadLinePageVo;
+import com.it.ck.server.pojo.vo.HeadlineQueryVo;
 import com.it.ck.server.service.NewsHeadLineService;
+
+import java.util.List;
 
 /**
  * Package: com.it.ck.server.service.impl
@@ -11,5 +18,24 @@ import com.it.ck.server.service.NewsHeadLineService;
  */
 
 public class NewsHeadLineServiceImpl implements NewsHeadLineService {
+	private static NewsHeadLineDao dao = new NewsHeadLineDaoImpl();
 
+	/**
+	 * 查询新闻列表
+	 *
+	 * @param query 用户的查询请求
+	 * @return page的分页信息包括新闻的列表
+	 */
+	@Override
+	public PageInfo<HeadLinePageVo> findPage(HeadlineQueryVo query) {
+		List<HeadLinePageVo> list = dao.findPage(query);
+		Integer totalSize = dao.findPageCount(query);
+		Integer pageSize = query.getPageSize();
+		Integer pageNum = query.getPageNum();
+		Integer totalPage = (totalSize+pageSize-1)/pageSize;
+
+		return new PageInfo<HeadLinePageVo>(
+				pageNum,pageSize,totalSize,totalPage,list
+		);
+	}
 }
