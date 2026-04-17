@@ -57,7 +57,6 @@ public class NewsUserController extends BaseController {
 		Result result = Result.ok(null);
 
 		if (userService.findByName(newsUser.getUsername()) == null) {
-
 			NewsUser user = userService.register(newsUser);
 			if (user != null) {
 				JDBCUtil.releaseConnectin();

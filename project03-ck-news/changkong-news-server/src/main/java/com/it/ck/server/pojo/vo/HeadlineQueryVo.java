@@ -21,4 +21,5 @@ public class HeadlineQueryVo implements Serializable {
 	private Integer type;               // 类型
 	private Integer pageNum;            // 第几页
 	private Integer pageSize;           // 一页多少条
+	private Integer publisher;
 }

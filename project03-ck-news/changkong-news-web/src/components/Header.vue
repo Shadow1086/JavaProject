@@ -38,12 +38,13 @@
                         <button class="search-btn" @click="search()">搜索</button>
                     </div>
 
-                    <div class="btn-list" v-if="!loginOrNot()">
+                    <div class="btn-list" v-if="!loginOrNot() && !hasToken">
                         <button class="login-btn" @click="login()">登录</button>
                         <button class="register-btn" @click="register()">注册</button>
                     </div>
                     <div class="btn-list" v-else>
                         <button class="logout-btn" @click="logOut()">退出登录</button>
+                        <button @click="personCenter()">个人中心</button>
                     </div>
                 </div>
             </div>
@@ -130,6 +131,9 @@ function logOut(){
 
 function register() {
     router.push("register");
+}
+function personCenter(){
+    router.push("addOrModifyNews")
 }
 
 function loginOrNot(){

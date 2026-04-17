@@ -128,7 +128,7 @@ async function register() {
         nickName: userRegister.nickName
     });
     if (data.code === 200) {
-        router.push("login");
+        await router.push("login");
     }
 }
 

@@ -25,7 +25,7 @@
                         <div class="span-list">
                             <span class="type">分类 {{ item.type }}</span>
                             <span class="page-view">浏览 {{ item.pageViews }}</span>
-                            <span class="past-hours">{{ item.pastHours }}小时前发布</span>
+                            <span class="past-hours">{{ item.pastHours }}小时前更新</span>
                         </div>
                     </div>
                     <button class="detail-btn" @click="showDetail(item.hid)">查看全文</button>
@@ -42,11 +42,11 @@
 
                 <div class="pageIndex">
                     <button
-                        v-for="page in pageNumbers"
-                        :key="page"
-                        class="page-number"
-                        :class="{ active: page === query.pageNum }"
-                        @click="goPage(page)"
+                            v-for="page in pageNumbers"
+                            :key="page"
+                            class="page-number"
+                            :class="{ active: page === query.pageNum }"
+                            @click="goPage(page)"
                     >
                         {{ page }}
                     </button>
@@ -57,10 +57,10 @@
                 <label class="page-size-box" for="pageSize">
                     <span>每页</span>
                     <select
-                        id="pageSize"
-                        name="pageSize"
-                        :value="query.pageSize"
-                        @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
+                            id="pageSize"
+                            name="pageSize"
+                            :value="query.pageSize"
+                            @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
                     >
                         <option value="5">5</option>
                         <option value="6">6</option>
@@ -80,6 +80,7 @@
 import {computed, ref, watch} from "vue";
 import instance from "../../axios";
 import {useRoute, useRouter} from "vue-router";
+import {hasToken} from "../../utils/token-auth";
 
 // 定义对象
 interface news {
@@ -120,17 +121,19 @@ const query = computed(() => ({
     pageSize: Number(route.query.pageSize ?? 5)
 }))
 
-// onMounted(loadPage);
 
 async function loadPage() {
-    try{
-        let {data} = await instance.post("/portal/findPage", query.value);
-        list.value = data.data.pageData ?? [];
-        pageInfo.value = data.data
-    }catch(error){
-        console.log("加载新闻列表失败："+error);
+    if(hasToken()){
+        try {
+            let {data} = await instance.post("/portal/findPage", query.value);
+            list.value = data.data.pageData ?? [];
+            pageInfo.value = data.data
+        } catch (error) {
+            console.log("加载新闻列表失败：" + error);
+        }
+    }else{
+        router.push("login");
     }
-
 
 }
 
@@ -161,13 +164,18 @@ function updateQuery(patch: Partial<{
     });
 }
 
-function showDetail(hid:number) {
-    router.push({
-      path:"/detail",
-      query:{
-          hid:Number(hid)
-      }
-    })
+function showDetail(hid: number) {
+    if(hasToken()){
+        router.push({
+            path: "/detail",
+            query: {
+                hid: Number(hid)
+            }
+        })
+    }else{
+        router.push("login");
+    }
+
 }
 
 function prevPage() {
@@ -224,9 +232,8 @@ function changePageSize(pageSize: number) {
     padding: 28px 32px;
     border: 1px solid rgba(33, 37, 41, 0.08);
     border-radius: 28px;
-    background:
-        radial-gradient(circle at top right, rgba(255, 192, 8, 0.2), transparent 28%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(242, 247, 251, 0.92) 100%);
+    background: radial-gradient(circle at top right, rgba(255, 192, 8, 0.2), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(242, 247, 251, 0.92) 100%);
     box-shadow: 0 24px 48px rgba(28, 43, 58, 0.1);
 }
 

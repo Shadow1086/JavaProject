@@ -60,7 +60,47 @@ public class NewsHeadLineServiceImpl implements NewsHeadLineService {
 	 */
 	@Override
 	public Integer addPageViews(Integer hid) {
-
 		return dao.addPageViews(hid);
+	}
+
+	/**
+	 * 根据用户id查找用户创建的文章
+	 *
+	 * @param uid 用户id
+	 * @return {@link PageInfo }<{@link HeadLinePageVo }>
+	 */
+	@Override
+	public PageInfo<HeadLinePageVo> findPageSelf(Integer uid,HeadlineQueryVo query) {
+		List<HeadLinePageVo> list = dao.findPageSelf(uid,query);
+		Integer totalSize = dao.findPageCount(query);
+		Integer pageSize = query.getPageSize();
+		Integer pageNum = query.getPageNum();
+		Integer totalPage = (totalSize+pageSize-1)/pageSize;
+
+		return new PageInfo<HeadLinePageVo>(
+				pageNum,pageSize,totalSize,totalPage,list
+		);
+	}
+
+	/**
+	 * 根据文章的hid删除文章
+	 *
+	 * @param hid 待删除的文章hid
+	 * @return boolean
+	 */
+	@Override
+	public boolean deleteHeadline(Integer hid) {
+		return dao.deleteHeadline(hid);
+	}
+
+	/**
+	 * 根据文章的hid查询该文章的创建用户
+	 *
+	 * @param hid 文章的hid
+	 * @return boolean
+	 */
+	@Override
+	public Integer findPageUid(Integer hid) {
+		return dao.findPageUid(hid);
 	}
 }

@@ -20,16 +20,16 @@ import java.util.Date;
 
 public class JwtHelper {
 	// token 过期时间
-	private static long EXPIRE_MILLS = 2000;
+	private static final long EXPIRE_MILLIS = 7 * 24 * 60 * 60 * 1000L;
 	//
-	private static String SECRET = "changkong-news-auth-secret-key-2026-32bytes";
+	private static final String SECRET = "changkong-news-auth-secret-key-2026-32bytes";
 
 	private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
 	// 生成token 字符串
 	public static String createToken(Integer uid, String username) {
 		Date now = new Date();
-		Date expireTime = new Date(now.getTime() + EXPIRE_MILLS);
+		Date expireTime = new Date(now.getTime() + EXPIRE_MILLIS);
 
 		return Jwts.builder()
 				// 设置主题，这个token主要代表谁

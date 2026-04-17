@@ -38,4 +38,29 @@ public interface NewsHeadLineService {
 	 * @return {@link Integer }
 	 */
 	public Integer addPageViews(Integer hid);
+
+	/**
+	 *  根据用户id查找用户创建的文章
+	 *
+	 * @param uid       用户id
+	 * @return {@link PageInfo }<{@link HeadLinePageVo }>
+	 */
+	public PageInfo<HeadLinePageVo> findPageSelf(Integer uid,HeadlineQueryVo query);
+
+	/**
+	 *  根据文章的hid删除文章
+	 *
+	 * @param hid   待删除的文章hid
+	 * @return boolean
+	 */
+	public boolean deleteHeadline(Integer hid);
+
+
+	/**
+	 *  根据文章的hid查询该文章的创建用户
+	 *
+	 * @param hid       文章的hid
+	 * @return boolean
+	 */
+	public Integer findPageUid(Integer hid);
 }

@@ -59,6 +59,8 @@ public class JDBCUtil {
 				connection.close();
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
+			}finally {
+				threadLocal.remove();
 			}
 		}
 	}

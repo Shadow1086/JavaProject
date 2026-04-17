@@ -9,6 +9,7 @@ import com.it.ck.server.service.NewsHeadLineService;
 import com.it.ck.server.service.NewsTypeService;
 import com.it.ck.server.service.impl.NewsHeadLineServiceImpl;
 import com.it.ck.server.service.impl.NewsTypeServiceImpl;
+import com.it.ck.server.utils.JwtHelper;
 import com.it.ck.server.utils.Result;
 import com.it.ck.server.utils.WebUtil;
 import jakarta.servlet.ServletException;
@@ -38,13 +39,34 @@ public class NewsPortalController extends BaseController {
 	}
 
 
+	/**
+	 * 根据用户的 搜索关键词 类别 进行新闻列表的搜索
+	 *
+	 */
 	protected void findPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		HeadlineQueryVo queryVo = WebUtil.readJson(req, HeadlineQueryVo.class);
 		PageInfo<HeadLinePageVo> list = headLineService.findPage(queryVo);
-		Result result = Result.ok(null);
 		if (list != null) {
-			result = Result.build(list, ResultCodeEnum.SUCCESS);
-			WebUtil.writeJson(resp,result);
+			WebUtil.writeJson(resp, Result.build(list, ResultCodeEnum.SUCCESS));
 		}
+	}
+
+	/**
+	 * 根据用户id查找用户创建的文章
+	 *
+	 */
+	protected void findPageSelf(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String authorization = req.getHeader("Authorization");
+		String token = null;
+		if (authorization!= null && authorization.startsWith("Bearer ")) {
+			token = authorization.substring(7);
+		}
+		HeadlineQueryVo queryVo = WebUtil.readJson(req, HeadlineQueryVo.class);
+		Integer uid = JwtHelper.getUserId(token);
+		queryVo.setPublisher(uid);
+		PageInfo<HeadLinePageVo> list = headLineService.findPageSelf(uid, queryVo);
+
+		WebUtil.writeJson(resp, Result.ok(list));
+
 	}
 }
