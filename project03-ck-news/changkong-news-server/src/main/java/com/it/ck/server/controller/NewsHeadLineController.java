@@ -2,10 +2,13 @@ package com.it.ck.server.controller;
 
 import com.it.ck.server.pojo.NewsHeadline;
 import com.it.ck.server.pojo.PageInfo;
+import com.it.ck.server.pojo.vo.HeadLineDetailVo;
 import com.it.ck.server.pojo.vo.HeadLinePageVo;
 import com.it.ck.server.pojo.vo.HeadlineQueryVo;
 import com.it.ck.server.service.NewsHeadLineService;
 import com.it.ck.server.service.impl.NewsHeadLineServiceImpl;
+import com.it.ck.server.utils.JDBCUtil;
+import com.it.ck.server.utils.Result;
 import com.it.ck.server.utils.WebUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,9 +32,15 @@ public class NewsHeadLineController extends BaseController{
 	private static NewsHeadLineService service = new NewsHeadLineServiceImpl();
 
 
-//	protected void findPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//		HeadlineQueryVo query = WebUtil.readJson(req, HeadlineQueryVo.class);
-//		PageInfo<HeadLinePageVo> page = service.findPage(query);
-//
-//	}
+	protected void headlineDetail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		Integer hid = WebUtil.readJson(req, Integer.class);
+//		Result<HeadLineDetailVo> result = Result.ok(null);
+		HeadLineDetailVo detail = service.headlineDetail(hid);
+		if(detail!=null){
+			WebUtil.writeJson(resp,Result.ok(detail));
+			JDBCUtil.releaseConnectin();
+		}else{
+			WebUtil.writeJson(resp,Result.ok("未知错误"));
+		}
+	}
 }

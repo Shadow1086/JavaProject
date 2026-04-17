@@ -50,6 +50,7 @@
 import instance from "../../axios";
 import {reactive, ref} from "vue";
 import router from "../../routers/router";
+import {setToken} from "../../utils/token-auth";
 
 type newsUser = {
     username: string;
@@ -71,8 +72,9 @@ async function login() {
             userPwd: newsUser.password
         });
         if (data.code === 200) {
-            console.log(data.token)
-            await router.push("header")
+            const token = data.data;
+            setToken(token);
+            await router.push("/headlinenews")
         } else if (data.code === 501) {
             alert("用户名错误");
         } else if (data.code === 503) {

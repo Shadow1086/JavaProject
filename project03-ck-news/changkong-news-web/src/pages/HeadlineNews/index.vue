@@ -28,7 +28,7 @@
                             <span class="past-hours">{{ item.pastHours }}小时前发布</span>
                         </div>
                     </div>
-                    <button class="detail-btn" @click="showDetail()">查看全文</button>
+                    <button class="detail-btn" @click="showDetail(item.hid)">查看全文</button>
                 </article>
             </div>
 
@@ -123,9 +123,14 @@ const query = computed(() => ({
 // onMounted(loadPage);
 
 async function loadPage() {
-    let {data} = await instance.post("/portal/findPage", query.value);
-    list.value = data.data.pageData ?? [];
-    pageInfo.value = data.data
+    try{
+        let {data} = await instance.post("/portal/findPage", query.value);
+        list.value = data.data.pageData ?? [];
+        pageInfo.value = data.data
+    }catch(error){
+        console.log("加载新闻列表失败："+error);
+    }
+
 
 }
 
@@ -156,8 +161,13 @@ function updateQuery(patch: Partial<{
     });
 }
 
-function showDetail() {
-
+function showDetail(hid:number) {
+    router.push({
+      path:"/detail",
+      query:{
+          hid:Number(hid)
+      }
+    })
 }
 
 function prevPage() {

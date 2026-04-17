@@ -9,11 +9,18 @@
 
             <div class="control-block">
                 <div class="type-list">
-                    <button class="type-chip" @click="searchByType(0)">全部</button>
+                    <button
+                        class="type-chip"
+                        :class="{ active: currentType === 0 }"
+                        @click="searchByType(0)"
+                    >
+                        全部
+                    </button>
                     <button
                         v-for="item in newsTypes"
                         :key="item.tid"
                         class="type-chip"
+                        :class="{ active: currentType === item.tid }"
                         @click="searchByType(item.tid)"
                     >
                         {{ item.tname }}
@@ -31,9 +38,12 @@
                         <button class="search-btn" @click="search()">搜索</button>
                     </div>
 
-                    <div class="btn-list">
+                    <div class="btn-list" v-if="!loginOrNot()">
                         <button class="login-btn" @click="login()">登录</button>
                         <button class="register-btn" @click="register()">注册</button>
+                    </div>
+                    <div class="btn-list" v-else>
+                        <button class="logout-btn" @click="logOut()">退出登录</button>
                     </div>
                 </div>
             </div>
@@ -44,9 +54,10 @@
 <script setup lang="ts">
 
 import instance from "../axios";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import router from "../routers/router";
 import {useRoute} from "vue-router";
+import {hasToken, removeToken} from "../utils/token-auth";
 
 interface NewsType {
     tid: number;
@@ -65,12 +76,15 @@ const newsTypes = ref<NewsType[]>([]);
 let keyWords = ref();
 
 const route = useRoute();
+const currentType = computed(() => Number(route.query.type ?? 0));
 
 async function showNewsTypes() {
     try {
         const response = await instance.get("/portal/findAllTypes");
         newsTypes.value = response.data.data ?? [];
     } catch (e) {
+        alert("登录过期，请重新登录")
+        router.push("login")
         newsTypes.value = [];
     }
 }
@@ -97,6 +111,7 @@ function searchByType(tid: number) {
             pageNum: 1
         }
     })
+    keyWords.value="";
 }
 
 onMounted(() => {
@@ -108,8 +123,17 @@ function login() {
     router.push("login");
 }
 
+function logOut(){
+    removeToken();
+    router.push("login");
+}
+
 function register() {
     router.push("register");
+}
+
+function loginOrNot(){
+    return hasToken();
 }
 </script>
 
@@ -200,6 +224,13 @@ function register() {
     color: #8b6810;
 }
 
+.type-chip.active {
+    border-color: rgba(255, 192, 8, 0.55);
+    background: linear-gradient(135deg, #ffd967 0%, #ffc008 100%);
+    color: #3b2f0d;
+    box-shadow: 0 10px 22px rgba(255, 192, 8, 0.2);
+}
+
 .right-header {
     display: flex;
     justify-content: space-between;
@@ -240,7 +271,8 @@ function register() {
 
 .search-btn,
 .login-btn,
-.register-btn {
+.register-btn,
+.logout-btn {
     min-height: 46px;
     padding: 0 18px;
     border: 1px solid transparent;
@@ -278,6 +310,19 @@ function register() {
     background: #ffc008;
     color: #2f2710;
     box-shadow: 0 10px 20px rgba(255, 192, 8, 0.22);
+}
+
+.logout-btn {
+    border-color: rgba(191, 72, 48, 0.18);
+    background: linear-gradient(135deg, #fff6f2 0%, #ffe8df 100%);
+    color: #b4472f;
+    box-shadow: 0 10px 22px rgba(191, 72, 48, 0.12);
+}
+
+.logout-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(191, 72, 48, 0.3);
+    background: linear-gradient(135deg, #ffece2 0%, #ffd9cd 100%);
 }
 
 @media (max-width: 860px) {

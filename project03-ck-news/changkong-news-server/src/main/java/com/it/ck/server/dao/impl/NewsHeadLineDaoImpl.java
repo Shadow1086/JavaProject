@@ -1,6 +1,7 @@
 package com.it.ck.server.dao.impl;
 
 import com.it.ck.server.dao.NewsHeadLineDao;
+import com.it.ck.server.pojo.vo.HeadLineDetailVo;
 import com.it.ck.server.pojo.vo.HeadLinePageVo;
 import com.it.ck.server.pojo.vo.HeadlineQueryVo;
 import com.it.ck.server.utils.JDBCUtil;
@@ -120,5 +121,68 @@ public class NewsHeadLineDaoImpl implements NewsHeadLineDao {
 			throw new RuntimeException(e);
 		}
 		return -1;
+	}
+
+	/**
+	 * 查询新闻详情
+	 *
+	 * @param hid 查询的新闻的hid
+	 * @return {@link HeadLineDetailVo }
+	 */
+	@Override
+	public HeadLineDetailVo headlineDetail(Integer hid) {
+		String sql = """
+				SELECT nh.hid,nh.title,nh.article,
+				       nh.type,ns.tname,nh.page_views AS pageViews,
+				       TIMESTAMPDIFF(HOUR, nh.create_time, NOW()) AS pastHours,
+				nh.publisher , nu.nick_name FROM news_headline nh
+				LEFT JOIN news_type ns ON nh.type = ns.tid
+				LEFT JOIN news_user nu ON nh.publisher = nu.uid
+				WHERE nh.hid = ?
+				""";
+		Connection connection = JDBCUtil.getConnection();
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setInt(1, hid);
+			try (ResultSet rs = ps.executeQuery()) {
+				HeadLineDetailVo detail = new HeadLineDetailVo();
+				while (rs.next()){
+					detail.setHid(rs.getInt(1));
+					detail.setTitle(rs.getString(2));
+					detail.setArticle(rs.getString(3));
+					detail.setType(rs.getInt(4));
+					detail.setTypeName(rs.getString(5));
+					detail.setPageViews(rs.getInt(6));
+					detail.setPastHours(rs.getLong(7));
+					detail.setPublisher(rs.getInt(8));
+					detail.setAuthor(rs.getString(9));
+				}
+				return detail;
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * 用户每查看一次曾加一次文章的pageViews访问量
+	 *
+	 * @param hid 用户访问的文章
+	 * @return {@link Integer }
+	 */
+	@Override
+	public Integer addPageViews(Integer hid) {
+		String sql = """
+				update news_headline set page_views = page_views+1
+				where hid = ?
+				""";
+		Connection connection = JDBCUtil.getConnection();
+		try(PreparedStatement ps = connection.prepareStatement(sql)){
+			ps.setInt(1,hid);
+			return ps.executeUpdate();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

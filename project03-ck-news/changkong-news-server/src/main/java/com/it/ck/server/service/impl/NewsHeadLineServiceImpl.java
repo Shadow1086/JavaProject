@@ -3,6 +3,7 @@ package com.it.ck.server.service.impl;
 import com.it.ck.server.dao.NewsHeadLineDao;
 import com.it.ck.server.dao.impl.NewsHeadLineDaoImpl;
 import com.it.ck.server.pojo.PageInfo;
+import com.it.ck.server.pojo.vo.HeadLineDetailVo;
 import com.it.ck.server.pojo.vo.HeadLinePageVo;
 import com.it.ck.server.pojo.vo.HeadlineQueryVo;
 import com.it.ck.server.service.NewsHeadLineService;
@@ -37,5 +38,29 @@ public class NewsHeadLineServiceImpl implements NewsHeadLineService {
 		return new PageInfo<HeadLinePageVo>(
 				pageNum,pageSize,totalSize,totalPage,list
 		);
+	}
+
+	/**
+	 * 查询新闻详情
+	 *
+	 * @param hid 查询的新闻的hid
+	 * @return {@link HeadLineDetailVo }
+	 */
+	@Override
+	public HeadLineDetailVo headlineDetail(Integer hid) {
+		dao.addPageViews(hid);
+		return dao.headlineDetail(hid);
+	}
+
+	/**
+	 * 用户每查看一次曾加一次文章的pageViews访问量
+	 *
+	 * @param hid 用户访问的文章
+	 * @return {@link Integer }
+	 */
+	@Override
+	public Integer addPageViews(Integer hid) {
+
+		return dao.addPageViews(hid);
 	}
 }
