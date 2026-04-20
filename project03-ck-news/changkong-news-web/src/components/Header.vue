@@ -38,13 +38,13 @@
                         <button class="search-btn" @click="search()">搜索</button>
                     </div>
 
-                    <div class="btn-list" v-if="!loginOrNot() && !hasToken">
+                    <div class="btn-list" v-if="!loginOrNot()">
                         <button class="login-btn" @click="login()">登录</button>
                         <button class="register-btn" @click="register()">注册</button>
                     </div>
                     <div class="btn-list" v-else>
                         <button class="logout-btn" @click="logOut()">退出登录</button>
-                        <button @click="personCenter()">个人中心</button>
+                        <button class="center-btn" @click="personCenter()">个人中心</button>
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@ async function showNewsTypes() {
         newsTypes.value = response.data.data ?? [];
     } catch (e) {
         alert("登录过期，请重新登录")
-        router.push("login")
+        router.push("/login")
         newsTypes.value = [];
     }
 }
@@ -121,19 +121,19 @@ onMounted(() => {
 
 
 function login() {
-    router.push("login");
+    router.push("/login");
 }
 
 function logOut(){
     removeToken();
-    router.push("login");
+    router.push("/login");
 }
 
 function register() {
-    router.push("register");
+    router.push("/register");
 }
 function personCenter(){
-    router.push("addOrModifyNews")
+    router.push("/addormodifynews")
 }
 
 function loginOrNot(){
@@ -239,26 +239,27 @@ function loginOrNot(){
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
 }
 
 .search-box {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex: 1;
+    max-width: 430px;
 }
 
 .search-input {
     flex: 1;
     min-width: 0;
-    height: 48px;
-    padding: 0 16px;
+    height: 44px;
+    padding: 0 14px;
     border: 1px solid rgba(49, 64, 78, 0.12);
-    border-radius: 14px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.98);
     color: #18232f;
-    font-size: 15px;
+    font-size: 14px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -276,11 +277,12 @@ function loginOrNot(){
 .search-btn,
 .login-btn,
 .register-btn,
-.logout-btn {
-    min-height: 46px;
-    padding: 0 18px;
+.logout-btn,
+.center-btn {
+    min-height: 42px;
+    padding: 0 16px;
     border: 1px solid transparent;
-    border-radius: 14px;
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -301,6 +303,8 @@ function loginOrNot(){
 
 .btn-list {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
@@ -323,10 +327,23 @@ function loginOrNot(){
     box-shadow: 0 10px 22px rgba(191, 72, 48, 0.12);
 }
 
+.center-btn {
+    border-color: rgba(49, 64, 78, 0.12);
+    background: linear-gradient(135deg, #f7fafc 0%, #edf3f7 100%);
+    color: #31404e;
+    box-shadow: 0 10px 22px rgba(49, 64, 78, 0.08);
+}
+
 .logout-btn:hover {
     transform: translateY(-1px);
     border-color: rgba(191, 72, 48, 0.3);
     background: linear-gradient(135deg, #ffece2 0%, #ffd9cd 100%);
+}
+
+.center-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(49, 64, 78, 0.22);
+    background: linear-gradient(135deg, #ffffff 0%, #e7eef3 100%);
 }
 
 @media (max-width: 860px) {
@@ -353,8 +370,7 @@ function loginOrNot(){
     }
 
     .search-box {
-        flex-direction: column;
-        align-items: stretch;
+        max-width: none;
     }
 
     .btn-list {
@@ -362,18 +378,34 @@ function loginOrNot(){
     }
 
     .login-btn,
-    .register-btn {
+    .register-btn,
+    .logout-btn,
+    .center-btn {
         flex: 1;
     }
 }
 
+@media (max-width: 640px) {
+    .search-box {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+}
+
 @media (max-width: 520px) {
+    .search-box {
+        grid-template-columns: 1fr;
+    }
+
     .btn-list {
         flex-direction: column;
     }
 
     .login-btn,
-    .register-btn {
+    .register-btn,
+    .logout-btn,
+    .center-btn,
+    .search-btn {
         width: 100%;
     }
 }

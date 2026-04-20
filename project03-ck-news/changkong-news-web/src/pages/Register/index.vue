@@ -83,20 +83,21 @@ const userRegister = reactive({
 
 const userPwdVerify = ref("");
 
-let infoUsername = ref("用户名建议使用 5-10 位字母或数字");
+let infoUsername = ref("用户名支持中文、字母、数字、下划线，长度 2-20 位");
 let infoUserPwd = ref("密码建议包含字母、数字和下划线");
 let infoUserPwdCon = ref("两次输入需要保持一致");
+
+const usernamePattern = /^[\u4e00-\u9fa5A-Za-z0-9_]{2,20}$/;
 
 // 验证输入格式
 
 function verityUsername() {
-    let pattern = /^[a-zA-Z0-9]{5,10}$/;
-    if (pattern.test(userRegister.username)) {
+    if (usernamePattern.test(userRegister.username)) {
         // 符合格式
         infoUsername.value = "用户名合法"
         return true;
     } else {
-        infoUsername.value = "用户名不合法"
+        infoUsername.value = "用户名支持中文、字母、数字、下划线，长度 2-20 位"
         return false;
     }
 }
@@ -114,14 +115,24 @@ function verityUserPwd() {
 
 function verityPwdCon() {
     if (userPwdVerify.value === userRegister.userPwd && userRegister.userPwd!=="") {
-        infoUserPwdCon.value = "密码与上次输入不一致!"
-    } else {
         infoUserPwdCon.value = "密码与上次输入一致,可继续"
+        return true;
+    } else {
+        infoUserPwdCon.value = "密码与上次输入不一致!"
+        return false;
     }
 }
 
 
 async function register() {
+    const usernameValid = verityUsername();
+    const passwordValid = verityUserPwd();
+    const passwordConfirmValid = verityPwdCon();
+
+    if (!usernameValid || !passwordValid || !passwordConfirmValid) {
+        return;
+    }
+
     const {data} = await instance.post("/user/register", {
         username: userRegister.username,
         userPwd: userRegister.userPwd,

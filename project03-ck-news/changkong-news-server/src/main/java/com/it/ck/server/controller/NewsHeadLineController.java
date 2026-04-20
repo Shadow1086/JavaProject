@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Package: com.it.ck.server.controller
@@ -43,24 +44,28 @@ public class NewsHeadLineController extends BaseController {
 
 
 	protected void deleteHeadline(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Integer hid = Integer.parseInt(req.getParameter("hid"));
+		Map<String, Object> map = WebUtil.readJson(req, Map.class);
+		Integer hid = (Integer) map.get("hid");
 		String authorization = req.getHeader("Authorization");
 		String token = null;
 		Result<Object> result = Result.ok(null);
 
-		if (authorization!= null && authorization.startsWith("Bearer ")) {
+		if (authorization != null && authorization.startsWith("Bearer ")) {
 			token = authorization.substring(7);
+
+		} else {
 			WebUtil.writeJson(resp, Result.ok(null));
+			return;
 		}
 
 		Integer uid = JwtHelper.getUserId(token);
 		// 验证文章的 创建用户 是不是 删除操作用户。查看权限
-		Integer pageUid = service.findPageUid(uid);
+		Integer pageUid = service.findPageUid(hid);
 		if (uid.equals(pageUid)) {
 			boolean flag = service.deleteHeadline(hid);
-			if(flag){
+			if (flag) {
 				result = Result.ok(ResultCodeEnum.SUCCESS);
-				WebUtil.writeJson(resp,result);
+				WebUtil.writeJson(resp, result);
 			}
 		}
 	}

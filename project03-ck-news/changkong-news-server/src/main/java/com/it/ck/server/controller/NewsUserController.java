@@ -54,6 +54,7 @@ public class NewsUserController extends BaseController {
 	 */
 	protected void register(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		NewsUser newsUser = WebUtil.readJson(req, NewsUser.class);
+
 		Result result = Result.ok(null);
 
 		if (userService.findByName(newsUser.getUsername()) == null) {

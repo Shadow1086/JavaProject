@@ -6,7 +6,7 @@ import {useRoute} from "vue-router";
 const route = useRoute()
 
 const showHeader = computed(()=>{
-    return route.path !="/login" && route.path !="/register" && route.path!="/addOrModifyNews";
+    return route.path !== "/login" && route.path !== "/register" && route.path !== "/addormodifynews" && route.path!=="/detail";
 })
 </script>
 <template>

@@ -62,8 +62,10 @@ let newsUser: newsUser = reactive({
     password: ""
 });
 
-let infoUsername = ref("用户名无特殊符号，5-10位");
+let infoUsername = ref("用户名支持中文、字母、数字、下划线，长度 2-20 位");
 let infoUserPwd = ref();
+
+const usernamePattern = /^[\u4e00-\u9fa5A-Za-z0-9_]{2,20}$/;
 
 async function login() {
     if (await verityUserPwd() && await verityUsername()) {
@@ -99,13 +101,12 @@ function register() {
 // 验证输入格式
 
 async function verityUsername() {
-    let pattern = /^[a-zA-Z0-9]{5,10}$/;
-    if (pattern.test(newsUser.username)) {
+    if (usernamePattern.test(newsUser.username)) {
         // 符合格式
         infoUsername.value = "用户名合法"
         return true;
     } else {
-        infoUsername.value = "用户名不合法"
+        infoUsername.value = "用户名支持中文、字母、数字、下划线，长度 2-20 位"
         return false;
     }
 }

@@ -280,13 +280,16 @@ public class NewsHeadLineDaoImpl implements NewsHeadLineDao {
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setInt(1, hid);
 			try (ResultSet rs = ps.executeQuery()) {
-				return rs.getInt(1);
+				if(rs.next()){
+					return rs.getInt(1);
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		return null;
 	}
 
 	/**
