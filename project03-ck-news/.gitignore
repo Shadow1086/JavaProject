@@ -38,14 +38,19 @@ lerna-debug.log*
 
 # Sensitive backend config
 **/db.properties
+**/db-local.properties
 **/jdbc.properties
 **/jdbc-*.properties
+**/news-api.properties
 **/application-local.properties
 **/application-dev.properties
 **/application-prod.properties
 **/application-secret.properties
 **/*secret*.properties
 **/*private*.properties
+!**/db.properties.example
+!**/db-local.properties.example
+!**/news-api.properties.example
 
 # Runtime uploads / temp files
 **/temp/

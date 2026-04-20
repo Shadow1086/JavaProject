@@ -1,0 +1,16 @@
+# Server database configuration example
+driverClassName=com.mysql.cj.jdbc.Driver
+url=jdbc:mysql://127.0.0.1:3306/ck_news?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+username=your_server_db_user
+password=your_server_db_password
+initialSize=5
+maxActive=10
+maxWait=1000
+
+# Server runtime paths example
+upload.path=/www/data/changkong-news/uploads
+log.path=/www/wwwlogs/changkong-news
+
+# JWT configuration example
+jwt.secret=replace-with-your-own-secret-key-at-least-32-bytes
+jwt.expireMillis=604800000

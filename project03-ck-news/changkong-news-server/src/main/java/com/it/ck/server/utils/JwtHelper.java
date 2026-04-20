@@ -7,8 +7,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Properties;
 
 /**
  * Package: com.it.ck.server.utils
@@ -20,11 +23,39 @@ import java.util.Date;
 
 public class JwtHelper {
 	// token 过期时间
-	private static final long EXPIRE_MILLIS = 7 * 24 * 60 * 60 * 1000L;
-	//
-	private static final String SECRET = "changkong-news-auth-secret-key-2026-32bytes";
+	private static final long EXPIRE_MILLIS;
+	private static final SecretKey KEY;
 
-	private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+	//	private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+	static {
+		Properties properties = loadJwtProperties();
+		String secret = properties.getProperty("jwt.secret");
+		if (secret == null || secret.isBlank()) {
+			throw new RuntimeException("jwt.secret 未配置");
+		}
+		String expireMillisText = properties.getProperty("jwt.expireMillis", "604800000");
+		try {
+			EXPIRE_MILLIS = Long.parseLong(expireMillisText);
+		} catch (NumberFormatException e) {
+			throw new RuntimeException("jwt.expireMillis 配置格式错误", e);
+		}
+		KEY = Keys.hmacShaKeyFor(secret.trim().getBytes(StandardCharsets.UTF_8));
+	}
+
+	private static Properties loadJwtProperties() {
+		String env = System.getProperty("ck.env","prod").trim().toLowerCase();
+		String fileName = "local".equals(env) ? "db-local.properties" : "db.properties";
+		Properties properties = new Properties();
+		try(InputStream inputStream = JwtHelper.class.getClassLoader().getResourceAsStream(fileName)){
+			if(inputStream == null){
+				throw new RuntimeException("未找到配置文件："+fileName);
+			}
+			properties.load(inputStream);
+			return properties;
+		} catch (IOException e) {
+			throw new RuntimeException("读取配置文件失败："+fileName,e);
+		}
+	}
 
 	// 生成token 字符串
 	public static String createToken(Integer uid, String username) {
@@ -70,24 +101,24 @@ public class JwtHelper {
 		try {
 			parseToken(token);
 			return true;
-		} catch (JwtException | IllegalArgumentException e ){
+		} catch (JwtException | IllegalArgumentException e) {
 			return false;
 		}
 	}
 
 	/**
-	 *  从token中获取用户id
+	 * 从token中获取用户id
 	 *
-	 * @param token         用户带来的token
+	 * @param token 用户带来的token
 	 * @return {@link Integer }
 	 */
-	public static Integer getUserId(String token){
+	public static Integer getUserId(String token) {
 		Claims claims = parseToken(token);
 		return Integer.valueOf(claims.getSubject());
 	}
 
-	public static String getUsername(String token){
+	public static String getUsername(String token) {
 		Claims claims = parseToken(token);
-		return claims.get("username",String.class);
+		return claims.get("username", String.class);
 	}
 }
