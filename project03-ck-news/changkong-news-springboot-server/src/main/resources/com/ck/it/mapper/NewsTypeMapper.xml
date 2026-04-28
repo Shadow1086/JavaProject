@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ck.it.mapper.NewsTypeMapper">
+
+    <resultMap id="BaseResultMap" type="com.ck.it.pojo.NewsType">
+            <id property="tid" column="tid" />
+            <result property="tname" column="tname" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        tid,tname
+    </sql>
+</mapper>
