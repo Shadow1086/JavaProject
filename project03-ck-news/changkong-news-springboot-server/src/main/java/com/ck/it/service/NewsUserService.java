@@ -2,7 +2,7 @@ package com.ck.it.service;
 
 import com.ck.it.pojo.NewsUser;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ck.it.pojo.dto.LoginRequest;
+import jakarta.validation.Valid;
 
 /**
 * @author liang-ht
@@ -10,5 +10,21 @@ import com.ck.it.pojo.dto.LoginRequest;
 * @createDate 2026-04-28 18:12:17
 */
 public interface NewsUserService extends IService<NewsUser> {
-	String login(LoginRequest request);
+	String login(NewsUser request);
+
+	/**
+	 *  根据用户名查找用户是否存在
+	 *
+	 * @param request   请求来的用户信息
+	 * @return boolean  存在：false 不存在：true
+	 */
+	boolean findByUsername(NewsUser request);
+
+	/**
+	 *  创建用户，返回主键
+	 *
+	 * @param request           请求的用户信息
+	 * @return {@link Long }
+	 */
+	Integer register(@Valid NewsUser request);
 }

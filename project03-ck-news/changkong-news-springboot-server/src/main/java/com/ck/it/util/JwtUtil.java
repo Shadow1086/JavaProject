@@ -29,7 +29,7 @@ public class JwtUtil {
 		return Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String createToken(Integer uid, String username) {
+	public String createToken(Long uid, String username) {
 		Date now = new Date();
 		Date expireTime = new Date(now.getTime() + jwtProperties.getExpireMillis());
 		return Jwts.builder()
