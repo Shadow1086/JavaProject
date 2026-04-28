@@ -2,7 +2,7 @@ spring:
   application:
     name: changkong-news-springboot-server
   profiles:
-    active: local
+    active: local,jwt
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true

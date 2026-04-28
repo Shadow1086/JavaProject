@@ -1,0 +1,4 @@
+jwt:
+  secret-key: changkong-news-secret-key-please-change-to-long-random-string
+  expire-millis: 604800000
+  issuer: changkong-news

@@ -1,9 +1,7 @@
 package com.ck.it.pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.util.Date;
 import lombok.Data;
 
@@ -13,6 +11,7 @@ import lombok.Data;
 @TableName(value ="news_headline")
 @Data
 public class NewsHeadline {
+	@TableId
     private Integer hid;
 
     private String title;
@@ -29,5 +28,6 @@ public class NewsHeadline {
 
     private Date updateTime;
 
+	@TableLogic
     private Integer isDeleted;
 }

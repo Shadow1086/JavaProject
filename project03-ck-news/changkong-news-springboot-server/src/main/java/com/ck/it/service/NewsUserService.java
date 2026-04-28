@@ -2,6 +2,7 @@ package com.ck.it.service;
 
 import com.ck.it.pojo.NewsUser;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ck.it.pojo.dto.LoginRequest;
 
 /**
 * @author liang-ht
@@ -9,5 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2026-04-28 18:12:17
 */
 public interface NewsUserService extends IService<NewsUser> {
-
+	String login(LoginRequest request);
 }
