@@ -8,7 +8,7 @@
                     <p class="panel-subtitle">创建你的长空头条账号，补全基础信息后即可登录。</p>
                 </div>
 
-                <form class="register-form">
+                <div class="register-form">
                     <label class="field-label" for="username">用户名</label>
                     <div class="field">
                         <input
@@ -40,10 +40,17 @@
                                 id="password"
                                 v-model="userRegister.userPwd"
                                 class="field-input"
-                                type="password"
+                                :type="showUserPwd ? 'text' : 'password'"
                                 placeholder="请输入密码"
                                 @blur="verityUserPwd()"
                         >
+                        <button
+                                type="button"
+                                class="eye-btn"
+                                @click="showUserPwd = !showUserPwd"
+                        >
+                            <img :src="eyeOffIcon" alt="切换密码显示状态">
+                        </button>
                         <span class="field-message">{{ infoUserPwd }}</span>
                     </div>
 
@@ -53,13 +60,20 @@
                                 id="password-verify"
                                 v-model="userPwdVerify"
                                 class="field-input"
-                                type="password"
+                                :type="showUserPwdCon ? 'text' : 'password'"
                                 placeholder="请再次输入密码"
                                 @blur="verityPwdCon()"
                         >
+                        <button
+                                type="button"
+                                @click="showUserPwdCon = !showUserPwdCon"
+                                class="eye-btn"
+                        >
+                            <img :src="eyeOffIcon" alt="切换密码显示状态">
+                        </button>
                         <span class="field-message">{{ infoUserPwdCon }}</span>
                     </div>
-                </form>
+                </div>
 
                 <div class="btnlist">
                     <button class="primary-btn" @click="register()">注册</button>
@@ -74,6 +88,7 @@
 import instance from "../../axios";
 import router from "../../routers/router";
 import {reactive, ref} from "vue";
+import eyeOffIcon from "../../assets/查看-隐藏-线.png";
 
 const userRegister = reactive({
     username: "",
@@ -82,6 +97,8 @@ const userRegister = reactive({
 });
 
 const userPwdVerify = ref("");
+const showUserPwd = ref(false);
+const showUserPwdCon = ref(false);
 
 let infoUsername = ref("用户名支持中文、字母、数字、下划线，长度 2-20 位");
 let infoUserPwd = ref("密码建议包含字母、数字和下划线");
@@ -114,7 +131,7 @@ function verityUserPwd() {
 }
 
 function verityPwdCon() {
-    if (userPwdVerify.value === userRegister.userPwd && userRegister.userPwd!=="") {
+    if (userPwdVerify.value === userRegister.userPwd && userRegister.userPwd !== "") {
         infoUserPwdCon.value = "密码与上次输入一致,可继续"
         return true;
     } else {
@@ -133,18 +150,27 @@ async function register() {
         return;
     }
 
-    const {data} = await instance.post("/user/register", {
-        username: userRegister.username,
-        userPwd: userRegister.userPwd,
-        nickName: userRegister.nickName
-    });
-    if (data.code === 200) {
-        await router.push("login");
+    try {
+        const {data} = await instance.post("/user/register", {
+            username: userRegister.username,
+            userPwd: userRegister.userPwd,
+            nickName: userRegister.nickName.trim()
+        });
+        if (data.code === 200) {
+            await router.push("/login");
+        } else if (data.code === 505) {
+            alert("用户名已被占用");
+        } else {
+            alert("注册失败");
+        }
+    } catch (error) {
+        console.error("register error", error);
+        alert("注册请求失败，请检查后端接口");
     }
 }
 
 function login() {
-    router.push("login");
+    router.push("/login");
 }
 </script>
 
@@ -220,15 +246,18 @@ function login() {
 }
 
 .field {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 90%;
 }
 
 .field-input {
-    width: 90%;
+    width: 100%;
+    box-sizing: border-box;
     height: 48px;
-    padding: 0 16px;
+    padding: 0 50px 0 16px;
     border: 1px solid rgba(49, 64, 78, 0.14);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.95);
@@ -246,6 +275,41 @@ function login() {
     border-color: #f0b70a;
     box-shadow: 0 0 0 4px rgba(255, 192, 8, 0.18);
     transform: translateY(-1px);
+}
+
+.eye-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 1;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eye-btn img {
+    width: 18px;
+    height: 18px;
+    display: block;
+    opacity: 0.58;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.eye-btn:hover img {
+    opacity: 0.92;
+    transform: scale(1.05);
+}
+
+.eye-btn:focus-visible {
+    outline: none;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(255, 192, 8, 0.18);
 }
 
 .field-message {
@@ -266,6 +330,7 @@ function login() {
 
 .btnlist button {
     width: 124px;
+    box-sizing: border-box;
     min-height: 46px;
     border: 1px solid transparent;
     border-radius: 14px;
@@ -292,26 +357,101 @@ function login() {
 }
 
 @media (max-width: 768px) {
+    .page {
+        min-height: auto;
+        align-items: flex-start;
+        padding: 16px 12px 28px;
+    }
+
     .container {
-        padding: 22px 18px;
+        width: 100%;
+        padding: 20px 14px;
+        border-radius: 24px;
+    }
+
+    .panel-header {
+        margin-bottom: 22px;
+    }
+
+    .panel-title {
+        font-size: 28px;
+    }
+
+    .panel-subtitle {
+        font-size: 14px;
+        line-height: 1.65;
     }
 
     .register-form {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px 0;
     }
 
     .field-label {
         padding-top: 0;
+        font-size: 14px;
+    }
+
+    .field {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .field-input {
+        height: 46px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+
+    .eye-btn {
+        top: 12px;
+        right: 12px;
+    }
+
+    .field-message {
+        min-height: auto;
+        font-size: 12px;
+        line-height: 1.5;
     }
 
     .btnlist {
         width: 100%;
         justify-content: stretch;
+        gap: 10px;
+        margin-top: 22px;
     }
 
     .btnlist button {
         width: 100%;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 420px) {
+    .page {
+        padding: 12px 10px 24px;
+    }
+
+    .container {
+        padding: 18px 12px;
+        border-radius: 20px;
+    }
+
+    .panel-tag {
+        font-size: 11px;
+    }
+
+    .panel-title {
+        font-size: 24px;
+    }
+
+    .panel-subtitle {
+        font-size: 13px;
+    }
+
+    .field-input {
+        padding-left: 14px;
+        padding-right: 44px;
     }
 }
 </style>

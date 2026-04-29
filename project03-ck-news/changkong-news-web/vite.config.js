@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:8080'
-  const apiRewriteBase = env.VITE_API_REWRITE_BASE || '/changkong-news-server'
+  const apiRewriteBase = env.VITE_API_REWRITE_BASE || ''
 
   return {
     plugins: [vue()],

@@ -28,10 +28,13 @@
                             id="password"
                             v-model="newsUser.password"
                             class="field-input"
-                            type="password"
+                            :type="showUserPwd ? 'text' : 'password'"
                             placeholder="请输入密码"
                             @blur="verityUserPwd()"
                         >
+                        <button @click="showUserPwd = !showUserPwd" type="button">
+                            <img :src="eyeIcon" alt="查看或隐藏密码">
+                        </button>
                         <span class="field-message">{{ infoUserPwd }}</span>
                     </div>
                 </form>
@@ -51,6 +54,7 @@ import instance from "../../axios";
 import {reactive, ref} from "vue";
 import router from "../../routers/router";
 import {setToken} from "../../utils/token-auth";
+import eyeIcon from "../../assets/查看-隐藏-线.png";
 
 type newsUser = {
     username: string;
@@ -64,6 +68,7 @@ let newsUser: newsUser = reactive({
 
 let infoUsername = ref("用户名支持中文、字母、数字、下划线，长度 2-20 位");
 let infoUserPwd = ref();
+const showUserPwd = ref(false);
 
 const usernamePattern = /^[\u4e00-\u9fa5A-Za-z0-9_]{2,20}$/;
 
@@ -91,11 +96,11 @@ async function login() {
 }
 
 function goback() {
-    router.push("headlineNews");
+    router.push("/headlinenews");
 }
 
 function register() {
-    router.push("register");
+    router.push("/register");
 }
 
 // 验证输入格式
@@ -198,15 +203,18 @@ async function verityUserPwd() {
 }
 
 .field {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 90%;
 }
 
 .field-input {
-    width: 90%;
+    width: 100%;
+    box-sizing: border-box;
     height: 48px;
-    padding: 0 16px;
+    padding: 0 50px 0 16px;
     border: 1px solid rgba(49, 64, 78, 0.14);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.95);
@@ -226,6 +234,41 @@ async function verityUserPwd() {
     transform: translateY(-1px);
 }
 
+.field > button[type="button"] {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 1;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field > button[type="button"] img {
+    width: 18px;
+    height: 18px;
+    display: block;
+    opacity: 0.58;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.field > button[type="button"]:hover img {
+    opacity: 0.92;
+    transform: scale(1.05);
+}
+
+.field > button[type="button"]:focus-visible {
+    outline: none;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(255, 192, 8, 0.18);
+}
+
 .field-message {
     min-height: 22px;
     color: #6e7f90;
@@ -235,14 +278,16 @@ async function verityUserPwd() {
 
 .btnlist {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     flex-wrap: wrap;
     width: 100%;
     gap: 12px;
+    margin-top: 28px;
 }
 
 .btnlist button {
     width: 124px;
+    box-sizing: border-box;
     min-height: 46px;
     border: 1px solid transparent;
     border-radius: 14px;
@@ -275,26 +320,101 @@ async function verityUserPwd() {
 }
 
 @media (max-width: 768px) {
+    .page {
+        min-height: auto;
+        align-items: flex-start;
+        padding: 16px 12px 28px;
+    }
+
     .container {
-        padding: 22px 18px;
+        width: 100%;
+        padding: 20px 14px;
+        border-radius: 24px;
+    }
+
+    .panel-header {
+        margin-bottom: 22px;
+    }
+
+    .panel-title {
+        font-size: 28px;
+    }
+
+    .panel-subtitle {
+        font-size: 14px;
+        line-height: 1.65;
     }
 
     .login-form {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px 0;
     }
 
     .field-label {
         padding-top: 0;
+        font-size: 14px;
+    }
+
+    .field {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .field-input {
+        height: 46px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+
+    .field > button[type="button"] {
+        top: 12px;
+        right: 12px;
+    }
+
+    .field-message {
+        min-height: auto;
+        font-size: 12px;
+        line-height: 1.5;
     }
 
     .btnlist {
         width: 100%;
         justify-content: stretch;
+        gap: 10px;
+        margin-top: 22px;
     }
 
     .btnlist button {
         width: 100%;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 420px) {
+    .page {
+        padding: 12px 10px 24px;
+    }
+
+    .container {
+        padding: 18px 12px;
+        border-radius: 20px;
+    }
+
+    .panel-tag {
+        font-size: 11px;
+    }
+
+    .panel-title {
+        font-size: 24px;
+    }
+
+    .panel-subtitle {
+        font-size: 13px;
+    }
+
+    .field-input {
+        padding-left: 14px;
+        padding-right: 44px;
     }
 }
 </style>
