@@ -1,6 +1,5 @@
 package com.ck.it.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ck.it.mapper.NewsUserMapper;
 import com.ck.it.pojo.NewsUser;
@@ -27,7 +26,9 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 
 	@Override
 	public String login(NewsUser request) {
-		NewsUser user = lambdaQuery().eq(NewsUser::getUsername, request.getUsername()).one();
+		NewsUser user = lambdaQuery().eq(NewsUser::getUsername,
+						request.getUsername())
+				.one();
 		if (user == null) {
 			throw new RuntimeException("用户名错误");
 		}
@@ -45,8 +46,8 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 	 * @return boolean      如果数据库中没有返回true,反之返回false;
 	 */
 	@Override
-	public boolean findByUsername(NewsUser request) {
-		return lambdaQuery().eq(NewsUser::getUsername, request.getUsername()).exists();
+	public NewsUser findByUsername(NewsUser request) {
+		return lambdaQuery().eq(NewsUser::getUsername, request.getUsername()).one();
 	}
 
 	/**
@@ -57,16 +58,29 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 	 */
 	@Override
 	public Integer register(NewsUser request) {
-		if (this.findByUsername(request)) {
+		if (this.findByUsername(request) == null) {
 			/// 如果数据库中没有该用户
 			request.setUserPwd(BcryptUtil.encode(request.getUserPwd()));
 			request.setUid(null);
 			return save(request) ? 1 : 0;
 		} else {
 			return -1;
+
 		}
 	}
 
+	@Override
+	public NewsUser getUserInfo(String token) {
+		if (jwt.isExpired(token)) {
+			throw new RuntimeException("token已过期，请重新登录");
+		}
+		/// token有效时
+		Long userId = jwt.getUserId(token);
+		if(userId == null){
+			throw new RuntimeException("token无效");
+		}
+		return lambdaQuery().eq(NewsUser::getUid, userId).one();
+	}
 }
 
 

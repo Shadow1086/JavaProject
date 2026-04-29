@@ -1,23 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ck.it.mapper.NewsHeadlineMapper">
 
-    <resultMap id="BaseResultMap" type="com.ck.it.pojo.NewsHeadline">
-            <id property="hid" column="hid" />
-            <result property="title" column="title" />
-            <result property="article" column="article" />
-            <result property="type" column="type" />
-            <result property="publisher" column="publisher" />
-            <result property="pageViews" column="page_views" />
-            <result property="createTime" column="create_time" />
-            <result property="updateTime" column="update_time" />
-            <result property="isDeleted" column="is_deleted" />
-    </resultMap>
+	<resultMap id="BaseResultMap" type="com.ck.it.pojo.NewsHeadline">
+		<id property="hid" column="hid"/>
+		<result property="title" column="title"/>
+		<result property="article" column="article"/>
+		<result property="type" column="type"/>
+		<result property="publisher" column="publisher"/>
+		<result property="pageViews" column="page_views"/>
+		<result property="createTime" column="create_time"/>
+		<result property="updateTime" column="update_time"/>
+		<result property="isDeleted" column="is_deleted"/>
+	</resultMap>
 
-    <sql id="Base_Column_List">
-        hid,title,article,type,publisher,page_views,
+	<sql id="Base_Column_List">
+		hid,title,article,type,publisher,page_views,
         create_time,update_time,is_deleted
-    </sql>
+	</sql>
+
+	<select id="selectMyPage" resultType="com.ck.it.pojo.vo.HeadlinePageVo">
+		SELECT nh.hid,
+		nh.title,
+		nh.type,
+		nu.nick_name,
+		nh.page_views AS pageViews,
+		TIMESTAMPDIFF(HOUR, create_time, NOW()) as pastHour
+		FROM news_headline AS nh
+		left join news_user as nu on nu.uid = nh.publisher
+		WHERE is_deleted = 0
+		<if test="request.keyWord != null and request.keyWord.length()>0">
+			AND title LIKE CONCAT('%',#{request.keyWord},'%')
+		</if>
+		<if test="request.type != 0">
+			AND type = #{request.type}
+		</if>
+		ORDER BY nh.update_time desc
+	</select>
 </mapper>

@@ -4,13 +4,10 @@ import com.ck.it.common.Result;
 import com.ck.it.common.ResultCodeEnum;
 import com.ck.it.pojo.NewsUser;
 import com.ck.it.service.NewsUserService;
-import com.ck.it.util.BcryptUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Package: com.ck.it.controller
@@ -42,5 +39,14 @@ public class NewsUserController {
 		} else {
 			return Result.fail("注册失败");
 		}
+	}
+
+	@PostMapping("getuserinfo")
+	public Result<NewsUser> getUserInfo(@RequestHeader("Authorization") String token) {
+		NewsUser userInfo = service.getUserInfo(token);
+		if (userInfo != null) {
+			return Result.ok(userInfo);
+		}
+		return Result.fail(null);
 	}
 }

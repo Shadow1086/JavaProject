@@ -1,5 +1,6 @@
 package com.ck.it.service;
 
+import com.ck.it.common.Result;
 import com.ck.it.pojo.NewsType;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -10,4 +11,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface NewsTypeService extends IService<NewsType> {
 
+	Result findAllTypes();
 }

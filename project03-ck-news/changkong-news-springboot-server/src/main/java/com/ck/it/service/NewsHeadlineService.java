@@ -1,7 +1,11 @@
 package com.ck.it.service;
 
+import com.ck.it.common.Result;
 import com.ck.it.pojo.NewsHeadline;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ck.it.pojo.dto.RequestPage;
+import com.ck.it.pojo.vo.HeadlinePageVo;
+import com.ck.it.pojo.vo.PageInfoVo;
 
 /**
 * @author liang-ht
@@ -10,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface NewsHeadlineService extends IService<NewsHeadline> {
 
+	Result<PageInfoVo<HeadlinePageVo>> findNewsPage(RequestPage request);
 }

@@ -50,14 +50,15 @@ public class JwtUtil {
 				.getPayload();
 	}
 
-	public  Integer getUserId(String token){
-		try{
-			if(!StringUtils.hasText(token)){
+	public Long getUserId(String token) {
+		try {
+			if (!StringUtils.hasText(token)) {
 				return null;
 			}
 			Claims claims = parseToken(token);
-			return  claims.get("uid",Integer.class);
-		}catch (Exception e ){
+			Number uid = claims.get("uid", Number.class);
+			return uid == null ? null : uid.longValue();
+		} catch (Exception e) {
 			return null;
 		}
 	}

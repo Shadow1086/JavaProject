@@ -11,8 +11,8 @@ import lombok.Data;
 @TableName(value ="news_headline")
 @Data
 public class NewsHeadline {
-	@TableId
-    private Integer hid;
+	@TableId(value = "hid", type = IdType.ASSIGN_ID)
+    private Long hid;
 
     private String title;
 
@@ -20,7 +20,7 @@ public class NewsHeadline {
 
     private Integer type;
 
-    private Integer publisher;
+    private Long publisher;
 
     private Integer pageViews;
 

@@ -1,7 +1,13 @@
 package com.ck.it.controller;
 
-import java.util.Scanner;
-import java.util.Arrays;
+import com.ck.it.common.Result;
+import com.ck.it.pojo.dto.RequestPage;
+import com.ck.it.pojo.vo.HeadlinePageVo;
+import com.ck.it.pojo.vo.PageInfoVo;
+import com.ck.it.service.NewsHeadlineService;
+import com.ck.it.service.NewsTypeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Package: com.ck.it.controller
@@ -10,7 +16,26 @@ import java.util.Arrays;
  * {@code @Author} Liang-ht
  * {@code @Create} 2026-2026/4/28 18:52
  */
-
+@RestController
+@RequestMapping("portal")
+@CrossOrigin
 public class NewsPortalController {
+	@Autowired
+	private NewsTypeService typeService;
+	@Autowired
+	private NewsHeadlineService headlineService;
 
+	@GetMapping("findAllTypes")
+	public Result findAllTypes(){
+		return typeService.findAllTypes();
+	}
+
+	@PostMapping("findNewsPage")
+	public Result<PageInfoVo<HeadlinePageVo>> findNewsPage(@RequestBody RequestPage request){
+		try{
+			return headlineService.findNewsPage(request);
+		} catch (RuntimeException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

@@ -1,7 +1,15 @@
 package com.ck.it.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ck.it.pojo.NewsHeadline;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ck.it.pojo.dto.RequestPage;
+import com.ck.it.pojo.vo.HeadlinePageVo;
+import com.ck.it.pojo.vo.PageInfoVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author liang-ht
@@ -11,6 +19,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface NewsHeadlineMapper extends BaseMapper<NewsHeadline> {
 
+	IPage<HeadlinePageVo> selectMyPage(IPage<HeadlinePageVo> page, @Param("request") RequestPage request);
 }
 
 
