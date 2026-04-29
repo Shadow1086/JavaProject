@@ -7,6 +7,7 @@ import com.ck.it.common.Result;
 import com.ck.it.mapper.NewsHeadlineMapper;
 import com.ck.it.pojo.NewsHeadline;
 import com.ck.it.pojo.dto.RequestPage;
+import com.ck.it.pojo.dto.RequestPublish;
 import com.ck.it.pojo.vo.DetailVo;
 import com.ck.it.pojo.vo.HeadlinePageVo;
 import com.ck.it.pojo.vo.PageInfoVo;
@@ -14,6 +15,8 @@ import com.ck.it.service.NewsHeadlineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * @author liang-ht
@@ -66,6 +69,21 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 
 		detail.setPageViews(detail.getPageViews() + 1);
 		return detail;
+	}
+
+	@Override
+	public boolean publish(RequestPublish request,Long uid) {
+		NewsHeadline headline = new NewsHeadline();
+
+		headline.setTitle(request.getTitle());
+		headline.setArticle(request.getArticle());
+		headline.setType(request.getType());
+		headline.setPageViews(0);
+		headline.setPublisher(uid);
+		headline.setCreateTime(new Date());
+		headline.setUpdateTime(new Date());
+
+		return save(headline);
 	}
 }
 
