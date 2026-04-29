@@ -1,5 +1,6 @@
 package com.ck.it.common;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,15 +17,25 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum ResultCodeEnum {
-	SUCCESS(200,"success"),
-	USERNAME_ERROR(501,"username error"),
-	PASSWORD_ERROR(502,"password error"),
-	NOT_LOGIN(503,"token is expired"),
-	TOKEN_INVALID(504,"token invalid"),
-	REGISTER_ERROR(505,"register error"),
-	USERNAME_USED(506,"username has been registered before");
+	SUCCESS(10000,"成功"),
+	FAIL(10001,"错误"),
 
+	PARAM_ERROR(20001,"参数错误"),
+
+	NOT_LOGIN(30001,"未登录"),
+	TOKEN_EXPIRED(30002,"token已过期"),
+	TOKEN_INVALID(30003,"token失效"),
+
+	USERNAME_ERROR(31001,"用户名错误"),
+	PASSWORD_ERROR(31002,"密码错误"),
+	USERNAME_USED(31003,"用户名已存在"),
+
+	HEADLINE_NOT_FOUND(40001,"新闻不存在"),
+	HEADLINE_NO_PERMISSION(40002,"无权限操作该新闻");
+
+	@Schema(name = "业务状态码",example = "10000")
 	private final Integer code;
+	@Schema(name = "业务状态信息",example = "成功")
 	private final String message;
 
 }

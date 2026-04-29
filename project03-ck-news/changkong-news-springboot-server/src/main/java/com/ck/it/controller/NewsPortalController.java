@@ -7,6 +7,8 @@ import com.ck.it.pojo.vo.HeadlinePageVo;
 import com.ck.it.pojo.vo.PageInfoVo;
 import com.ck.it.service.NewsHeadlineService;
 import com.ck.it.service.NewsTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,17 +23,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("portal")
 @CrossOrigin
+@Tag(name = "首页接口",description = "首页新闻类别与列表展示")
 public class NewsPortalController {
 	@Autowired
 	private NewsTypeService typeService;
 	@Autowired
 	private NewsHeadlineService headlineService;
-
+	@Operation(summary = "展示所有类别分类",description = "页眉展示的新闻类型分类查询")
 	@GetMapping("findAllTypes")
 	public Result findAllTypes(){
 		return typeService.findAllTypes();
 	}
-
+	@Operation(summary = "新闻列表展示",description = "新闻列表展示接口")
 	@PostMapping("findNewsPage")
 	public Result<PageInfoVo<HeadlinePageVo>> findNewsPage(@RequestBody RequestPage request){
 		try{
@@ -40,7 +43,7 @@ public class NewsPortalController {
 			throw new RuntimeException(e);
 		}
 	}
-
+	@Operation(summary = "新闻详情",description = "展示新闻详情")
 	@PostMapping("showHeadlineDetail")
 	public Result<DetailVo> showHeadlineDetail(@RequestParam("hid") Long hid){
 		DetailVo detail = headlineService.showHeadlineDetail(hid);

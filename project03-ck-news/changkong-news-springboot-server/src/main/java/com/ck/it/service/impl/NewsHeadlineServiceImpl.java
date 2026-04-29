@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ck.it.common.Result;
+import com.ck.it.common.ResultCodeEnum;
+import com.ck.it.exception.BusinessException;
 import com.ck.it.mapper.NewsHeadlineMapper;
 import com.ck.it.pojo.NewsHeadline;
 import com.ck.it.pojo.dto.RequestPage;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author liang-ht
@@ -43,7 +46,7 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	@Override
 	public Result<PageInfoVo<HeadlinePageVo>> findNewsPage(RequestPage request) {
 		IPage<HeadlinePageVo> page = new Page<>(request.getCurrentPage(),
-												request.getPageSize());
+				request.getPageSize());
 
 		IPage<HeadlinePageVo> resultPage = mapper.selectMyPage(page, request);
 
@@ -72,7 +75,7 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	}
 
 	@Override
-	public boolean publish(RequestPublish request,Long uid) {
+	public boolean publish(RequestPublish request, Long uid) {
 		NewsHeadline headline = new NewsHeadline();
 
 		headline.setTitle(request.getTitle());
@@ -84,6 +87,27 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 		headline.setUpdateTime(new Date());
 
 		return save(headline);
+	}
+
+	@Override
+	public boolean updateData(NewsHeadline headline) {
+		Integer version = mapper.selectById(headline.getHid()).getVersion();
+		headline.setVersion(version);
+		headline.setUpdateTime(new Date());
+
+		int rows = mapper.updateById(headline);
+		return rows == 1;
+	}
+
+	@Override
+	public boolean headlinePermission(Long hid, Long userId) {
+		NewsHeadline headline = getById(hid);
+		if(headline!=null){
+			Long publisher = headline.getPublisher();
+			return Objects.equals(publisher, userId);
+		}else{
+			throw new BusinessException(ResultCodeEnum.HEADLINE_NOT_FOUND);
+		}
 	}
 }
 

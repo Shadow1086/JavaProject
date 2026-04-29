@@ -21,4 +21,8 @@ public interface NewsHeadlineService extends IService<NewsHeadline> {
 	DetailVo showHeadlineDetail(Long hid);
 
 	boolean publish(RequestPublish request,Long uid);
+
+	boolean updateData(NewsHeadline headline);
+
+	boolean headlinePermission(Long hid, Long userId);
 }

@@ -1,6 +1,8 @@
 package com.ck.it.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ck.it.common.ResultCodeEnum;
+import com.ck.it.exception.BusinessException;
 import com.ck.it.mapper.NewsUserMapper;
 import com.ck.it.pojo.NewsUser;
 import com.ck.it.service.NewsUserService;
@@ -30,11 +32,11 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 						request.getUsername())
 				.one();
 		if (user == null) {
-			throw new RuntimeException("用户名错误");
+			throw new BusinessException(ResultCodeEnum.USERNAME_ERROR);
 		}
 		boolean matches = BcryptUtil.matches(request.getUserPwd(), user.getUserPwd());
 		if (!matches) {
-			throw new RuntimeException("密码错误");
+			throw new BusinessException(ResultCodeEnum.PASSWORD_ERROR);
 		}
 		return jwt.createToken(user.getUid(), user.getUsername());
 	}
@@ -72,12 +74,12 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 	@Override
 	public NewsUser getUserInfo(String token) {
 		if (jwt.isExpired(token)) {
-			throw new RuntimeException("token已过期，请重新登录");
+			throw new BusinessException(ResultCodeEnum.TOKEN_EXPIRED);
 		}
 		/// token有效时
 		Long userId = jwt.getUserId(token);
 		if(userId == null){
-			throw new RuntimeException("token无效");
+			throw new BusinessException(ResultCodeEnum.TOKEN_INVALID);
 		}
 		return lambdaQuery().eq(NewsUser::getUid, userId).one();
 	}
