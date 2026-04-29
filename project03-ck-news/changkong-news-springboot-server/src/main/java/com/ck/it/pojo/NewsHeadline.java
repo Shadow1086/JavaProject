@@ -30,4 +30,6 @@ public class NewsHeadline {
 
 	@TableLogic
     private Integer isDeleted;
+	@Version
+	private Integer version;
 }

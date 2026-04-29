@@ -7,14 +7,13 @@ import com.ck.it.common.Result;
 import com.ck.it.mapper.NewsHeadlineMapper;
 import com.ck.it.pojo.NewsHeadline;
 import com.ck.it.pojo.dto.RequestPage;
+import com.ck.it.pojo.vo.DetailVo;
 import com.ck.it.pojo.vo.HeadlinePageVo;
 import com.ck.it.pojo.vo.PageInfoVo;
 import com.ck.it.service.NewsHeadlineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author liang-ht
@@ -40,7 +39,8 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	 */
 	@Override
 	public Result<PageInfoVo<HeadlinePageVo>> findNewsPage(RequestPage request) {
-		IPage<HeadlinePageVo> page = new Page<>(request.getCurrentPage(), request.getPageSize());
+		IPage<HeadlinePageVo> page = new Page<>(request.getCurrentPage(),
+												request.getPageSize());
 
 		IPage<HeadlinePageVo> resultPage = mapper.selectMyPage(page, request);
 
@@ -52,6 +52,20 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 		pageInfoVo.setPageList(page.getRecords());
 
 		return Result.ok(pageInfoVo);
+	}
+
+	@Override
+	public DetailVo showHeadlineDetail(Long hid) {
+		DetailVo detail = mapper.showHeadlineDetail(hid);
+
+		NewsHeadline headline = new NewsHeadline();
+		headline.setHid(detail.getHid());
+		headline.setVersion(detail.getVersion());
+		headline.setPageViews(detail.getPageViews() + 1);
+		mapper.updateById(headline);
+
+		detail.setPageViews(detail.getPageViews() + 1);
+		return detail;
 	}
 }
 

@@ -39,4 +39,19 @@
 		</if>
 		ORDER BY nh.update_time desc
 	</select>
+	<select id="showHeadlineDetail" resultType="com.ck.it.pojo.vo.DetailVo">
+		SELECT nh.hid,
+		       nh.title,
+		       nh.`version`,
+		       nh.article,
+		       nt.tname                                AS typeName,
+		       nh.page_views,
+		       TIMESTAMPDIFF(HOUR, nh.update_time, NOW()) AS pastHour,
+		       nu.username                             AS username,
+		       nu.nick_name                            AS author
+		FROM news_headline AS nh
+			     LEFT JOIN news_user AS nu ON nh.publisher = nu.uid
+			     LEFT JOIN news_type AS nt ON nh.type = nt.tid
+		WHERE nh.hid = #{hid}
+	</select>
 </mapper>
