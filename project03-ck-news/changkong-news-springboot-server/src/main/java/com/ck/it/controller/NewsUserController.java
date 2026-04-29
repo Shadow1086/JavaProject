@@ -6,7 +6,6 @@ import com.ck.it.pojo.NewsUser;
 import com.ck.it.service.NewsUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -42,11 +41,21 @@ public class NewsUserController {
 	}
 
 	@PostMapping("getuserinfo")
-	public Result<NewsUser> getUserInfo(@RequestHeader("Authorization") String token) {
+	public Result<Object> getUserInfo(@RequestHeader("Authorization") String token) {
 		NewsUser userInfo = service.getUserInfo(token);
-		if (userInfo != null) {
-			return Result.ok(userInfo);
+		try {
+			if (userInfo != null) {
+				return Result.ok(userInfo);
+			}
+			return Result.fail(null);
+		} catch (RuntimeException e) {
+			if (e.getMessage().equals("token已过期，请重新登录")) {
+				return Result.build("token已过期，请重新登录", ResultCodeEnum.NOT_LOGIN);
+			} else if (e.getMessage().equals("token无效")) {
+				return Result.build("token无效", ResultCodeEnum.TOKEN_INVALID);
+			}
 		}
 		return Result.fail(null);
 	}
+
 }
