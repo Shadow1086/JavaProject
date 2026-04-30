@@ -25,4 +25,6 @@ public interface NewsHeadlineService extends IService<NewsHeadline> {
 	boolean updateData(NewsHeadline headline);
 
 	boolean headlinePermission(Long hid, Long userId);
+
+//	List<> findHeadlineSelf(Long userId);
 }

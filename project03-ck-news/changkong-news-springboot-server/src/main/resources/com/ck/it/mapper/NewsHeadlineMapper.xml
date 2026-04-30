@@ -37,6 +37,9 @@
 		<if test="request.type != 0">
 			AND type = #{request.type}
 		</if>
+		<if test="request.uid!=0 and request.uid !=null">
+			AND nh.publisher = #{request.uid}
+		</if>
 		ORDER BY nh.update_time desc
 	</select>
 	<select id="showHeadlineDetail" resultType="com.ck.it.pojo.vo.DetailVo">

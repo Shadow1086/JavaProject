@@ -17,6 +17,7 @@ import com.ck.it.service.NewsHeadlineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Objects;
@@ -45,17 +46,18 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	 */
 	@Override
 	public Result<PageInfoVo<HeadlinePageVo>> findNewsPage(RequestPage request) {
-		IPage<HeadlinePageVo> page = new Page<>(request.getCurrentPage(),
+		IPage<HeadlinePageVo> page = new Page<>(
+				request.getCurrentPage(),
 				request.getPageSize());
 
 		IPage<HeadlinePageVo> resultPage = mapper.selectMyPage(page, request);
 
 		PageInfoVo<HeadlinePageVo> pageInfoVo = new PageInfoVo<>();
 
-		pageInfoVo.setCurrentPage((int) page.getCurrent());
-		pageInfoVo.setPageSize((int) page.getSize());
-		pageInfoVo.setTotal((int) page.getTotal());
-		pageInfoVo.setPageList(page.getRecords());
+		pageInfoVo.setCurrentPage((int) resultPage.getCurrent());
+		pageInfoVo.setPageSize((int) resultPage.getSize());
+		pageInfoVo.setTotal((int) resultPage.getTotal());
+		pageInfoVo.setPageList(resultPage.getRecords());
 
 		return Result.ok(pageInfoVo);
 	}
@@ -75,6 +77,7 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	}
 
 	@Override
+	@Transactional
 	public boolean publish(RequestPublish request, Long uid) {
 		NewsHeadline headline = new NewsHeadline();
 
@@ -90,6 +93,7 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	}
 
 	@Override
+	@Transactional
 	public boolean updateData(NewsHeadline headline) {
 		Integer version = mapper.selectById(headline.getHid()).getVersion();
 		headline.setVersion(version);
@@ -102,10 +106,10 @@ public class NewsHeadlineServiceImpl extends ServiceImpl<NewsHeadlineMapper, New
 	@Override
 	public boolean headlinePermission(Long hid, Long userId) {
 		NewsHeadline headline = getById(hid);
-		if(headline!=null){
+		if (headline != null) {
 			Long publisher = headline.getPublisher();
 			return Objects.equals(publisher, userId);
-		}else{
+		} else {
 			throw new BusinessException(ResultCodeEnum.HEADLINE_NOT_FOUND);
 		}
 	}
