@@ -11,6 +11,7 @@ import com.ck.it.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author liang-ht
@@ -27,6 +28,7 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 	private NewsUserMapper mapper;
 
 	@Override
+	@Transactional
 	public String login(NewsUser request) {
 		NewsUser user = lambdaQuery().eq(NewsUser::getUsername,
 						request.getUsername())
@@ -59,6 +61,7 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 	 * @return {@link Long }
 	 */
 	@Override
+	@Transactional
 	public Integer register(NewsUser request) {
 		if (this.findByUsername(request) == null) {
 			/// 如果数据库中没有该用户
@@ -66,8 +69,7 @@ public class NewsUserServiceImpl extends ServiceImpl<NewsUserMapper, NewsUser>
 			request.setUid(null);
 			return save(request) ? 1 : 0;
 		} else {
-			return -1;
-
+			throw new BusinessException(ResultCodeEnum.USERNAME_USED);
 		}
 	}
 

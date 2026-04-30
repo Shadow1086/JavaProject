@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.io.IOException;
+
 /**
  * Package: com.ck.it.interceptor
  * Description:
@@ -30,18 +32,18 @@ public class LoginProtectedInterceptor implements HandlerInterceptor {
 		if (token == null || token.isEmpty()) {
 			/// 没有token
 			result = Result.build(null,ResultCodeEnum.NOT_LOGIN);
+			writeJson(response,result);
+			return false;
 		}
-		boolean expired = jwt.isExpired(token);
-		if (!expired) {
-			/// 如果没过期
-			return true;
-		} else {
-			/// 过期
-			result = Result.build(null, ResultCodeEnum.TOKEN_EXPIRED);
+		if(jwt.isExpired(token)){
+			writeJson(response,Result.build(null,ResultCodeEnum.TOKEN_EXPIRED));
+			return false;
 		}
-		ObjectMapper objectMapper = new ObjectMapper();
-		String json = objectMapper.writeValueAsString(result);
-		response.getWriter().print(json);
-		return false;
+		return true;
+	}
+
+	private void writeJson(HttpServletResponse response,Result<Object> result) throws IOException{
+		response.setContentType("application/json;charset=UTF-8");
+		new ObjectMapper().writeValue(response.getWriter(),result);
 	}
 }
