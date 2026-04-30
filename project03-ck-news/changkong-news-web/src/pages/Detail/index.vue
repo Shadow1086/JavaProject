@@ -7,7 +7,7 @@
         <div class="infoAuthor">
             <span>{{detail.typeName}}</span>
             <span>{{detail.author}}</span>
-            <span>{{detail.pastHours}}小时前发布</span>
+            <span>{{ formatPastHour(detail.pastHour) }}发布</span>
             <span>{{detail.pageViews}}</span>
         </div>
         <div class="content">
@@ -22,20 +22,21 @@
 
 import {computed, onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
-import instance from "../../axios";
+import instance, {SUCCESS_CODE} from "../../axios";
+import {formatPastHour} from "../../utils/time-format";
 const router = useRouter()
 const route = useRoute();
-const hid = computed(()=>Number(route.query.hid ?? 0))
+const hid = computed(()=>String(route.query.hid ?? ""))
 
 interface detailInter{
-    hid:number;
+    hid:string;
     title:string;
     article:string;
-    type:number;
     typeName:string;
     pageViews:number;
-    pastHours:string;
-    publisher:number;
+    pastHour:number;
+    version:number;
+    username:string;
     author:string;
 }
 
@@ -46,9 +47,19 @@ onMounted(()=>{
 })
 
 async function showDetail(){
-    let {data} = await instance.post("/headline/headlineDetail",hid.value);
-    detail.value = data.data;
-    if(detail.value === null){
+    if (!hid.value) {
+        alert("缺少新闻编号");
+        return;
+    }
+
+    let {data} = await instance.post("/portal/showHeadlineDetail", null, {
+        params: {
+            hid: hid.value
+        }
+    });
+    if(data.code === SUCCESS_CODE && data.data){
+        detail.value = data.data;
+    }else{
         alert("未知错误，请重试")
     }
 }

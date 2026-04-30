@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import instance from "../../axios";
+import instance, {PASSWORD_ERROR_CODE, SUCCESS_CODE, USERNAME_ERROR_CODE} from "../../axios";
 import {reactive, ref} from "vue";
 import router from "../../routers/router";
 import {setToken} from "../../utils/token-auth";
@@ -74,20 +74,24 @@ const usernamePattern = /^[\u4e00-\u9fa5A-Za-z0-9_]{2,20}$/;
 
 async function login() {
     if (await verityUserPwd() && await verityUsername()) {
-        let {data} = await instance.post("/user/login", {
-            username: newsUser.username,
-            userPwd: newsUser.password
-        });
-        if (data.code === 200) {
-            const token = data.data;
-            setToken(token);
-            await router.push("/headlinenews")
-        } else if (data.code === 501) {
-            alert("用户名错误");
-        } else if (data.code === 503) {
-            alert("密码错误");
-        } else {
-            alert("未知错误");
+        try {
+            let {data} = await instance.post("/user/login", {
+                username: newsUser.username,
+                userPwd: newsUser.password
+            });
+            if (data.code === SUCCESS_CODE) {
+                const token = data.data;
+                setToken(token);
+                await router.push("/headlinenews")
+            } else if (data.code === USERNAME_ERROR_CODE) {
+                alert("用户名错误");
+            } else if (data.code === PASSWORD_ERROR_CODE) {
+                alert("密码错误");
+            } else {
+                alert(data.message || "未知错误");
+            }
+        } catch (error) {
+            alert("登录请求失败，请检查后端接口");
         }
     } else {
         alert("用户名密码有误");

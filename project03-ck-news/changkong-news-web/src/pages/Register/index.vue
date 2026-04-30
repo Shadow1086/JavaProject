@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import instance from "../../axios";
+import instance, {SUCCESS_CODE, USERNAME_USED_CODE} from "../../axios";
 import router from "../../routers/router";
 import {reactive, ref} from "vue";
 import eyeOffIcon from "../../assets/查看-隐藏-线.png";
@@ -156,12 +156,12 @@ async function register() {
             userPwd: userRegister.userPwd,
             nickName: userRegister.nickName.trim()
         });
-        if (data.code === 200) {
+        if (data.code === SUCCESS_CODE) {
             await router.push("/login");
-        } else if (data.code === 505) {
+        } else if (data.code === USERNAME_USED_CODE) {
             alert("用户名已被占用");
         } else {
-            alert("注册失败");
+            alert(data.message || "注册失败");
         }
     } catch (error) {
         console.error("register error", error);

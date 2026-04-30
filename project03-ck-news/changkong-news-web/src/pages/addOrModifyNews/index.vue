@@ -3,14 +3,14 @@
         <section class="hero-card">
             <div class="hero-main">
                 <div class="hero-copy">
-                    <p class="hero-tag">CONTENT STUDIO</p>
-                    <h1 class="hero-title">文章管理台</h1>
+                    <p class="hero-tag">{{ editorVisible ? "CONTENT EDITOR" : "CONTENT STUDIO" }}</p>
+                    <h1 class="hero-title">{{ editorVisible ? editorTitle : "文章管理台" }}</h1>
                     <p class="hero-subtitle">
-                        查看、检索并管理你发布的文章。
+                        {{ editorVisible ? editorSubtitle : "查看、检索并管理你发布的文章。" }}
                     </p>
                 </div>
 
-                <div class="hero-stats">
+                <div v-if="!editorVisible" class="hero-stats">
                     <div class="stat-pill">
                         <span class="stat-label">当前页</span>
                         <strong>{{ query.pageNum }}</strong>
@@ -32,11 +32,12 @@
 
             <div class="hero-actions">
                 <button class="ghost-btn" @click="goback()">返回首页</button>
-                <button class="primary-btn" @click="addHeadline()">写文章</button>
+                <button v-if="editorVisible" class="primary-btn" type="button" @click="closeEditor()">返回列表</button>
+                <button v-else class="primary-btn" type="button" @click="addHeadline()">写文章</button>
             </div>
         </section>
 
-        <section class="toolbar-card">
+        <section v-if="!editorVisible" class="toolbar-card">
             <div class="search-panel">
                 <label class="search-label" for="searchInput">搜索文章</label>
                 <div class="search-box">
@@ -52,7 +53,72 @@
             </div>
         </section>
 
-        <section class="content-card">
+        <section v-if="editorVisible" class="editor-card">
+            <div class="editor-header">
+                <div>
+                    <p class="section-tag">{{ editorMode === "create" ? "WRITE HEADLINE" : "EDIT HEADLINE" }}</p>
+                    <h2>{{ editorTitle }}</h2>
+                    <p class="editor-subtitle">{{ editorSubtitle }}</p>
+                </div>
+                <button class="ghost-btn" type="button" @click="closeEditor()">关闭</button>
+            </div>
+
+            <div v-if="loadingEdit" class="editor-loading">
+                正在加载文章
+            </div>
+
+            <form v-else class="editor-form" @submit.prevent="submitEditor()">
+                <label class="field-block" for="headlineTitle">
+                    <span>文章标题</span>
+                    <input
+                        id="headlineTitle"
+                        v-model="articleForm.title"
+                        type="text"
+                        maxlength="50"
+                        placeholder="输入文章标题"
+                    >
+                </label>
+
+                <div class="form-row">
+                    <label class="field-block" for="headlineType">
+                        <span>文章分类</span>
+                        <select id="headlineType" v-model.number="articleForm.type">
+                            <option :value="0">请选择分类</option>
+                            <option v-for="item in newsTypes" :key="item.tid" :value="item.tid">
+                                {{ item.tname }}
+                            </option>
+                        </select>
+                    </label>
+
+                    <div class="field-counter">
+                        <span>标题 {{ titleLength }}/50</span>
+                        <span>正文 {{ articleLength }}/5000</span>
+                    </div>
+                </div>
+
+                <label class="field-block" for="headlineArticle">
+                    <span>正文内容</span>
+                    <textarea
+                        id="headlineArticle"
+                        v-model="articleForm.article"
+                        maxlength="5000"
+                        rows="12"
+                        placeholder="输入正文内容"
+                    ></textarea>
+                </label>
+
+                <p v-if="formError" class="form-error">{{ formError }}</p>
+
+                <div class="editor-actions">
+                    <button class="ghost-btn" type="button" @click="resetEditorForm()">清空表单</button>
+                    <button class="primary-btn" type="submit" :disabled="submitting">
+                        {{ submitButtonText }}
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section v-if="!editorVisible" class="content-card">
             <div class="list-header">
                 <div>
                     <p class="section-tag">MY HEADLINES</p>
@@ -85,14 +151,15 @@
                         <h3 class="headline-title">{{ item.title }}</h3>
 
                         <div class="headline-info">
-                            <span>作者 {{ item.publisher }}</span>
+                            <span>作者 {{ item.nickName || "未知" }}</span>
                             <span>浏览 {{ item.pageViews }}</span>
-                            <span>{{ item.pastHours }} 小时前更新</span>
+                            <span>{{ formatPastHour(item.pastHour) }}更新</span>
                         </div>
                     </div>
 
                     <div class="headline-actions">
                         <button class="detail-btn" @click="showDetail(item.hid)">查看详情</button>
+                        <button class="edit-btn" @click="editHeadline(item.hid)">修改文章</button>
                         <button class="danger-btn" @click="deleteHeadline(item.hid)">删除文章</button>
                     </div>
                 </article>
@@ -137,18 +204,19 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
-import instance from "../../axios";
+import {computed, onMounted, ref, watch} from "vue";
+import instance, {HEADLINE_NO_PERMISSION_CODE, SUCCESS_CODE} from "../../axios";
 import {useRoute, useRouter} from "vue-router";
 import {hasToken} from "../../utils/token-auth";
+import {formatPastHour} from "../../utils/time-format";
 
 interface News {
-    hid: number;
+    hid: string;
     title: string;
     type: number;
+    nickName: string;
     pageViews: number;
-    pastHours: number;
-    publisher: number;
+    pastHour: number;
 }
 
 interface PageInfo<T> {
@@ -159,6 +227,31 @@ interface PageInfo<T> {
     pageData: T[];
 }
 
+interface BackendPageInfo<T> {
+    currentPage: number;
+    pageSize: number;
+    total: number;
+    pageList: T[];
+}
+
+interface NewsType {
+    tid: number;
+    tname: string;
+}
+
+interface HeadlineDetail {
+    hid: string;
+    title: string;
+    article: string;
+    type: number;
+}
+
+interface ArticleForm {
+    title: string;
+    type: number;
+    article: string;
+}
+
 interface QueryParams {
     keyWords: string;
     type: number;
@@ -166,12 +259,26 @@ interface QueryParams {
     pageSize: number;
 }
 
+type EditorMode = "create" | "edit";
+
 const route = useRoute();
 const router = useRouter();
 
 const list = ref<News[]>([]);
 const pageInfo = ref<PageInfo<News> | null>(null);
 const searchKeyWords = ref("");
+const newsTypes = ref<NewsType[]>([]);
+const editorVisible = ref(false);
+const editorMode = ref<EditorMode>("create");
+const editingHid = ref("");
+const loadingEdit = ref(false);
+const submitting = ref(false);
+const formError = ref("");
+const articleForm = ref<ArticleForm>({
+    title: "",
+    type: 0,
+    article: ""
+});
 
 const query = computed<QueryParams>(() => ({
     keyWords: String(route.query.keyWords ?? ""),
@@ -187,6 +294,23 @@ const pageNumbers = computed(() => {
     return Array.from({length: pageInfo.value.totalPage}, (_, index) => index + 1);
 });
 
+const editorTitle = computed(() => editorMode.value === "create" ? "写文章" : "修改文章");
+const editorSubtitle = computed(() => editorMode.value === "create"
+    ? "发布后会出现在你的文章列表中。"
+    : "提交后会更新原文章内容。");
+const submitButtonText = computed(() => {
+    if (submitting.value) {
+        return editorMode.value === "create" ? "发布中..." : "保存中...";
+    }
+    return editorMode.value === "create" ? "发布文章" : "保存修改";
+});
+const titleLength = computed(() => articleForm.value.title.length);
+const articleLength = computed(() => articleForm.value.article.length);
+
+onMounted(() => {
+    loadNewsTypes();
+});
+
 watch(
     () => route.query,
     () => {
@@ -198,6 +322,19 @@ watch(
     }
 );
 
+async function loadNewsTypes() {
+    try {
+        const {data} = await instance.get("/portal/findAllTypes");
+        if (data.code === SUCCESS_CODE) {
+            newsTypes.value = data.data ?? [];
+        } else {
+            newsTypes.value = [];
+        }
+    } catch {
+        newsTypes.value = [];
+    }
+}
+
 async function loadPage() {
     if (!hasToken()) {
         await router.push("/login");
@@ -205,30 +342,30 @@ async function loadPage() {
     }
 
     try {
-        const {data} = await instance.post("/portal/findPageSelf", query.value);
-        list.value = data.data?.pageData ?? [];
-        pageInfo.value = data.data ?? {
-            pageNum: query.value.pageNum,
-            pageSize: query.value.pageSize,
-            totalSize: 0,
-            totalPage: 0,
-            pageData: []
-        };
+        const {data} = await instance.post("/headline/findMyNewsPage", {
+            keyWord: query.value.keyWords,
+            type: query.value.type,
+            currentPage: query.value.pageNum,
+            pageSize: query.value.pageSize
+        });
+        if (data.code !== SUCCESS_CODE) {
+            list.value = [];
+            pageInfo.value = emptyPageInfo();
+            return;
+        }
+
+        const backendPage = data.data as BackendPageInfo<News> | null;
+        list.value = backendPage?.pageList ?? [];
+        pageInfo.value = toPageInfo(backendPage);
     } catch (error) {
         list.value = [];
-        pageInfo.value = {
-            pageNum: query.value.pageNum,
-            pageSize: query.value.pageSize,
-            totalSize: 0,
-            totalPage: 0,
-            pageData: []
-        };
+        pageInfo.value = emptyPageInfo();
         alert("查询文章列表失败：" + error);
     }
 }
 
 function updateQuery(patch: Partial<QueryParams>) {
-    router.push({
+    return router.push({
         path: "/addormodifynews",
         query: {
             keyWords: String(patch.keyWords ?? query.value.keyWords),
@@ -278,7 +415,7 @@ function goPage(page: number) {
     updateQuery({pageNum: page});
 }
 
-function showDetail(hid: number) {
+function showDetail(hid: string) {
     if (!hasToken()) {
         router.push("/login");
         return;
@@ -291,14 +428,27 @@ function showDetail(hid: number) {
     });
 }
 
-async function deleteHeadline(hid: number) {
+async function deleteHeadline(hid: string) {
     if (!hasToken()) {
         await router.push("/login");
         return;
     }
 
     try {
-        await instance.post("/headline/deleteHeadline", {hid});
+        const {data} = await instance.delete("/headline/delete", {
+            params: {
+                hid
+            }
+        });
+
+        if (data.code !== SUCCESS_CODE) {
+            if (data.code === HEADLINE_NO_PERMISSION_CODE) {
+                alert("无权限删除该文章");
+            } else {
+                alert(data.message || "删除文章失败");
+            }
+            return;
+        }
 
         if (list.value.length === 1 && query.value.pageNum > 1) {
             updateQuery({pageNum: query.value.pageNum - 1});
@@ -316,7 +466,163 @@ function goback() {
 }
 
 function addHeadline() {
-    alert("写作功能待开发中，敬请期待");
+    if (!hasToken()) {
+        router.push("/login");
+        return;
+    }
+    editorMode.value = "create";
+    editingHid.value = "";
+    resetEditorForm();
+    editorVisible.value = true;
+}
+
+async function editHeadline(hid: string) {
+    if (!hasToken()) {
+        await router.push("/login");
+        return;
+    }
+
+    editorMode.value = "edit";
+    editingHid.value = hid;
+    editorVisible.value = true;
+    loadingEdit.value = true;
+    formError.value = "";
+    resetEditorForm();
+
+    try {
+        const {data} = await instance.get("/headline/findHeadlineById", {
+            params: {
+                hid
+            }
+        });
+
+        if (data.code !== SUCCESS_CODE || !data.data) {
+            formError.value = data.message || "文章不存在";
+            return;
+        }
+
+        const headline = data.data as HeadlineDetail;
+        editingHid.value = String(headline.hid ?? hid);
+        articleForm.value = {
+            title: headline.title ?? "",
+            type: Number(headline.type ?? 0),
+            article: headline.article ?? ""
+        };
+    } catch (error) {
+        formError.value = "加载文章失败：" + error;
+    } finally {
+        loadingEdit.value = false;
+    }
+}
+
+function closeEditor() {
+    editorVisible.value = false;
+    loadingEdit.value = false;
+    submitting.value = false;
+    formError.value = "";
+}
+
+function resetEditorForm() {
+    articleForm.value = {
+        title: "",
+        type: 0,
+        article: ""
+    };
+    formError.value = "";
+}
+
+async function submitEditor() {
+    if (!validateEditorForm()) {
+        return;
+    }
+
+    submitting.value = true;
+    formError.value = "";
+
+    const payload = {
+        title: articleForm.value.title.trim(),
+        type: articleForm.value.type,
+        article: articleForm.value.article.trim()
+    };
+
+    try {
+        const {data} = editorMode.value === "create"
+            ? await instance.post("/headline/publish", payload)
+            : await instance.post("/headline/update", {
+                hid: editingHid.value,
+                ...payload
+            });
+
+        if (data.code !== SUCCESS_CODE) {
+            formError.value = data.message || (editorMode.value === "create" ? "发布文章失败" : "保存修改失败");
+            return;
+        }
+
+        closeEditor();
+        if (editorMode.value === "create") {
+            await updateQuery({
+                keyWords: "",
+                type: 0,
+                pageNum: 1
+            });
+        }
+        await loadPage();
+    } catch (error) {
+        formError.value = (editorMode.value === "create" ? "发布文章失败：" : "保存修改失败：") + error;
+    } finally {
+        submitting.value = false;
+    }
+}
+
+function validateEditorForm() {
+    const title = articleForm.value.title.trim();
+    const article = articleForm.value.article.trim();
+
+    if (!title) {
+        formError.value = "请填写文章标题";
+        return false;
+    }
+    if (title.length > 50) {
+        formError.value = "文章标题不能超过 50 个字";
+        return false;
+    }
+    if (!articleForm.value.type) {
+        formError.value = "请选择文章分类";
+        return false;
+    }
+    if (!article) {
+        formError.value = "请填写正文内容";
+        return false;
+    }
+    if (article.length > 5000) {
+        formError.value = "正文内容不能超过 5000 个字";
+        return false;
+    }
+
+    return true;
+}
+
+function toPageInfo(backendPage: BackendPageInfo<News> | null): PageInfo<News> {
+    const pageSize = backendPage?.pageSize ?? query.value.pageSize;
+    const totalSize = backendPage?.total ?? 0;
+
+    return {
+        pageNum: backendPage?.currentPage ?? query.value.pageNum,
+        pageSize,
+        totalSize,
+        totalPage: pageSize > 0 ? Math.ceil(totalSize / pageSize) : 0,
+        pageData: backendPage?.pageList ?? []
+    };
+}
+
+function emptyPageInfo(): PageInfo<News> {
+    return {
+        pageNum: query.value.pageNum,
+        pageSize: query.value.pageSize,
+        totalSize: 0,
+        totalPage: 0,
+        pageData: []
+    };
 }
 </script>
 
@@ -331,6 +637,7 @@ function addHeadline() {
 
 .hero-card,
 .toolbar-card,
+.editor-card,
 .content-card {
     border: 1px solid rgba(33, 37, 41, 0.08);
     border-radius: 30px;
@@ -419,6 +726,131 @@ function addHeadline() {
 
 .toolbar-card {
     padding: 14px 18px;
+}
+
+.editor-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.editor-header h2 {
+    margin: 0;
+    color: #18232f;
+    font-size: 28px;
+}
+
+.editor-subtitle {
+    margin: 8px 0 0;
+    color: #667789;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.editor-loading {
+    padding: 28px 18px;
+    border: 1px dashed rgba(49, 64, 78, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.76);
+    color: #526373;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.field-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #31404e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.field-block input,
+.field-block select,
+.field-block textarea {
+    width: 100%;
+    border: 1px solid rgba(49, 64, 78, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.98);
+    color: #18232f;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-block input,
+.field-block select {
+    height: 44px;
+    padding: 0 12px;
+}
+
+.field-block textarea {
+    min-height: 220px;
+    padding: 12px;
+    resize: vertical;
+}
+
+.field-block input:focus,
+.field-block select:focus,
+.field-block textarea:focus {
+    outline: none;
+    border-color: #f0b70a;
+    box-shadow: 0 0 0 4px rgba(255, 192, 8, 0.15);
+}
+
+.field-counter {
+    min-width: 180px;
+    padding: 12px 14px;
+    border: 1px solid rgba(49, 64, 78, 0.08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.78);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #667789;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.form-error {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(191, 72, 48, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 232, 223, 0.72);
+    color: #b4472f;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .search-panel {
@@ -564,6 +996,7 @@ function addHeadline() {
 .primary-btn,
 .ghost-btn,
 .detail-btn,
+.edit-btn,
 .danger-btn,
 .pager-btn,
 .page-number {
@@ -592,6 +1025,13 @@ function addHeadline() {
     color: #31404e;
 }
 
+.edit-btn {
+    border-color: rgba(38, 120, 104, 0.18);
+    background: linear-gradient(135deg, #eef8f4 0%, #dff1ea 100%);
+    color: #1f6d5d;
+    box-shadow: 0 10px 20px rgba(38, 120, 104, 0.1);
+}
+
 .danger-btn {
     border-color: rgba(191, 72, 48, 0.18);
     background: linear-gradient(135deg, #fff6f2 0%, #ffe8df 100%);
@@ -602,10 +1042,17 @@ function addHeadline() {
 .primary-btn:hover,
 .ghost-btn:hover,
 .detail-btn:hover,
+.edit-btn:hover,
 .danger-btn:hover,
 .pager-btn:hover,
 .page-number:hover {
     transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .search-btn {
@@ -671,6 +1118,7 @@ function addHeadline() {
 
     .hero-card,
     .toolbar-card,
+    .editor-card,
     .content-card {
         padding: 18px 16px;
         border-radius: 24px;
@@ -678,9 +1126,18 @@ function addHeadline() {
 
     .hero-card,
     .headline-card,
+    .editor-header,
     .list-header {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .field-counter {
+        min-width: 0;
     }
 
     .hero-stats {
@@ -733,6 +1190,14 @@ function addHeadline() {
 
     .headline-actions {
         flex-direction: column;
+    }
+
+    .editor-actions {
+        flex-direction: column;
+    }
+
+    .editor-actions button {
+        width: 100%;
     }
 
     .search-box {

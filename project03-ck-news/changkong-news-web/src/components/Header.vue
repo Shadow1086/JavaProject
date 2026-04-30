@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 
-import instance from "../axios";
+import instance, {SUCCESS_CODE} from "../axios";
 import {computed, onMounted, ref} from "vue";
 import router from "../routers/router";
 import {useRoute} from "vue-router";
@@ -63,12 +63,6 @@ import {hasToken, removeToken} from "../utils/token-auth";
 interface NewsType {
     tid: number;
     tname: string;
-}
-
-interface Result<T> {
-    code: number;
-    message: string;
-    data: T;
 }
 
 // export let keywords = ref();
@@ -82,10 +76,13 @@ const currentType = computed(() => Number(route.query.type ?? 0));
 async function showNewsTypes() {
     try {
         const response = await instance.get("/portal/findAllTypes");
-        newsTypes.value = response.data.data ?? [];
+        if (response.data.code === SUCCESS_CODE) {
+            newsTypes.value = response.data.data ?? [];
+        } else {
+            newsTypes.value = [];
+        }
     } catch (e) {
-        alert("登录过期，请重新登录")
-        router.push("/login")
+        alert("加载新闻分类失败")
         newsTypes.value = [];
     }
 }

@@ -25,7 +25,7 @@
                         <div class="span-list">
                             <span class="type">分类 {{ item.type }}</span>
                             <span class="page-view">浏览 {{ item.pageViews }}</span>
-                            <span class="past-hours">{{ item.pastHours }}小时前更新</span>
+                            <span class="past-hours">{{ formatPastHour(item.pastHour) }}更新</span>
                         </div>
                     </div>
                     <button class="detail-btn" @click="showDetail(item.hid)">查看全文</button>
@@ -78,18 +78,18 @@
 <script setup lang="ts">
 
 import {computed, ref, watch} from "vue";
-import instance from "../../axios";
+import instance, {SUCCESS_CODE} from "../../axios";
 import {useRoute, useRouter} from "vue-router";
-import {hasToken} from "../../utils/token-auth";
+import {formatPastHour} from "../../utils/time-format";
 
 // 定义对象
 interface news {
-    hid: number;
+    hid: string;
     title: string;
-    type: string;
+    type: number;
+    nickName: string;
     pageViews: number;
-    pastHours: string;
-    publisher: number
+    pastHour: number;
 }
 
 interface PageInfo<T> {
@@ -98,6 +98,13 @@ interface PageInfo<T> {
     totalSize: number;
     totalPage: number;
     pageData: T[]
+}
+
+interface BackendPageInfo<T> {
+    currentPage: number;
+    pageSize: number;
+    total: number;
+    pageList: T[];
 }
 
 // 定义变量
@@ -123,16 +130,27 @@ const query = computed(() => ({
 
 
 async function loadPage() {
-    if(hasToken()){
-        try {
-            let {data} = await instance.post("/portal/findPage", query.value);
-            list.value = data.data.pageData ?? [];
-            pageInfo.value = data.data
-        } catch (error) {
-            console.log("加载新闻列表失败：" + error);
+    try {
+        const {data} = await instance.post("/portal/findNewsPage", {
+            keyWord: query.value.keyWords,
+            type: query.value.type,
+            currentPage: query.value.pageNum,
+            pageSize: query.value.pageSize
+        });
+
+        if (data.code !== SUCCESS_CODE) {
+            list.value = [];
+            pageInfo.value = emptyPageInfo();
+            return;
         }
-    }else{
-        router.push("login");
+
+        const backendPage = data.data as BackendPageInfo<news> | null;
+        list.value = backendPage?.pageList ?? [];
+        pageInfo.value = toPageInfo(backendPage);
+    } catch (error) {
+        list.value = [];
+        pageInfo.value = emptyPageInfo();
+        console.log("加载新闻列表失败：" + error);
     }
 
 }
@@ -164,17 +182,13 @@ function updateQuery(patch: Partial<{
     });
 }
 
-function showDetail(hid: number) {
-    if(hasToken()){
-        router.push({
-            path: "/detail",
-            query: {
-                hid: Number(hid)
-            }
-        })
-    }else{
-        router.push("login");
-    }
+function showDetail(hid: string) {
+    router.push({
+        path: "/detail",
+        query: {
+            hid: String(hid)
+        }
+    })
 
 }
 
@@ -207,6 +221,29 @@ function changePageSize(pageSize: number) {
         pageSize,
         pageNum: 1
     });
+}
+
+function toPageInfo(backendPage: BackendPageInfo<news> | null): PageInfo<news> {
+    const pageSize = backendPage?.pageSize ?? query.value.pageSize;
+    const totalSize = backendPage?.total ?? 0;
+
+    return {
+        pageNum: backendPage?.currentPage ?? query.value.pageNum,
+        pageSize,
+        totalSize,
+        totalPage: pageSize > 0 ? Math.ceil(totalSize / pageSize) : 0,
+        pageData: backendPage?.pageList ?? []
+    };
+}
+
+function emptyPageInfo(): PageInfo<news> {
+    return {
+        pageNum: query.value.pageNum,
+        pageSize: query.value.pageSize,
+        totalSize: 0,
+        totalPage: 0,
+        pageData: []
+    };
 }
 
 </script>
