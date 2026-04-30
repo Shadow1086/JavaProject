@@ -7,15 +7,24 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-  type-aliases-package: com.study.pojo
+  type-aliases-package: com.ck.it.pojo
   mapper-locations: classpath*:/mapper/**/*.xml
   global-config:
     db-config:
       id-type: assign_id    # 全局将主键设置为雪花算法策略
-      logic-delete-field: deleted;    # 逻辑删除的属性名 全局配置
+      logic-delete-field: isDeleted;    # 逻辑删除的属性名 全局配置
       logic-not-delete-value: 0   # 未删除为0
       logic-delete-value: 1     # 删除为1
 server:
   port: 8080
   servlet:
     context-path: /
+
+logging:
+  file:
+    name: logs/changkong-news.log
+  level:
+    root: info
+    com.ck.it: debug
+    com.ck.it.mapper: debug
+    com.springframework.web: debug

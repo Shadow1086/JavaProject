@@ -3,6 +3,7 @@ package com.ck.it.advice;
 import com.ck.it.common.Result;
 import com.ck.it.common.ResultCodeEnum;
 import com.ck.it.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -14,14 +15,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * {@code @Create} 2026-2026/4/29 19:44
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 	@ExceptionHandler(BusinessException.class)
 	public Result<Object> handleBusinessException(BusinessException e) {
+		log.warn("业务异常：code = {},message={}",
+				e.getCodeEnum().getCode(),
+				e.getCodeEnum().getMessage());
 		return Result.build(null, e.getCodeEnum());
 	}
 
 	@ExceptionHandler(Exception.class)
 	public Result<Object> handleException(Exception e) {
+		log.error("系统异常",e);
 		return Result.build(null, ResultCodeEnum.FAIL);
 	}
 }
