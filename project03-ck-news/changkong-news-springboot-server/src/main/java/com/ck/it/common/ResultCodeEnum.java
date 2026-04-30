@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Scanner;
-import java.util.Arrays;
-
 /**
  * Package: com.ck.it.common
  * Description:
@@ -16,6 +13,7 @@ import java.util.Arrays;
  */
 @Getter
 @AllArgsConstructor
+@Schema(description = "业务响应状态码")
 public enum ResultCodeEnum {
 	SUCCESS(10000,"成功"),
 	FAIL(10001,"错误"),
@@ -33,9 +31,9 @@ public enum ResultCodeEnum {
 	HEADLINE_NOT_FOUND(40001,"新闻不存在"),
 	HEADLINE_NO_PERMISSION(40002,"无权限操作该新闻");
 
-	@Schema(name = "业务状态码",example = "10000")
+	@Schema(description = "业务状态码",example = "10000")
 	private final Integer code;
-	@Schema(name = "业务状态信息",example = "成功")
+	@Schema(description = "业务状态信息",example = "成功")
 	private final String message;
 
 }

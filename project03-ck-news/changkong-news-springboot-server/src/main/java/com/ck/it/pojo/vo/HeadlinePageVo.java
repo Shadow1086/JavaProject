@@ -24,9 +24,14 @@ public class HeadlinePageVo {
 	@NotBlank(message = "hid不能为空")
 	private Long hid;
 
+	@Schema(description = "新闻标题", example = "长空新闻发布测试")
 	private String title;
+	@Schema(description = "新闻类别ID", example = "1")
 	private Integer type;
+	@Schema(description = "发布者昵称", example = "张三")
 	private String nickName;
+	@Schema(description = "浏览量", example = "128")
 	private Integer pageViews;
+	@Schema(description = "距离发布时间的小时数", example = "3")
 	private Long pastHour;
 }

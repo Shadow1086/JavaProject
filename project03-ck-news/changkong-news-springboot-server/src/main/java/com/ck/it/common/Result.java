@@ -1,5 +1,6 @@
 package com.ck.it.common;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.jspecify.annotations.NonNull;
@@ -14,10 +15,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Data
+@Schema(description = "统一接口响应结果")
 public class Result<T> {
+	@Schema(description = "业务状态码", example = "10000")
 	private Integer code;
+	@Schema(description = "业务状态信息", example = "成功")
 	private String message;
 	@NotBlank
+	@Schema(description = "响应数据")
 	private T data;
 
 
