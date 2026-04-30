@@ -3,13 +3,11 @@ package com.it.ck.server.dao.impl;
 import com.it.ck.server.dao.NewsUserDao;
 import com.it.ck.server.pojo.NewsUser;
 import com.it.ck.server.utils.JDBCUtil;
-import com.it.ck.server.utils.Result;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -78,17 +76,20 @@ public class NewsUserDaoImpl implements NewsUserDao {
 		) {
 			ps.setString(1, user.getUsername());
 			ps.setString(2, user.getUserPwd());
-			ps.setString(3, Objects.equals(user.getNickName(), "") ? user.getNickName() : null);
+			String nickName = Objects.equals(user.getNickName(), "") || user.getNickName() == null
+					? ""
+					: user.getNickName();
+			ps.setString(3, nickName);
 			int row = ps.executeUpdate();
-			if(row>0){
-				try(ResultSet rs = ps.getGeneratedKeys()){
-					if(rs.next()){
+			if (row > 0) {
+				try (ResultSet rs = ps.getGeneratedKeys()) {
+					if (rs.next()) {
 						user.setUid(rs.getInt(1));
 					}
 				}
 				return user;
 			}
-return null;
+			return null;
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

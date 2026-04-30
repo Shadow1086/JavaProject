@@ -60,6 +60,7 @@ public class NewsUserController extends BaseController {
 		if (userService.findByName(newsUser.getUsername()) == null) {
 			NewsUser user = userService.register(newsUser);
 			if (user != null) {
+				System.out.println(user);
 				JDBCUtil.releaseConnectin();
 				WebUtil.writeJson(resp, result);
 			}
